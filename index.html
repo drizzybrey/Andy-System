@@ -890,6 +890,7 @@ a{touch-action:manipulation;}
 #panel-week .section-heading h2,#panel-upper .section-heading h2{color:var(--upper);}
 #panel-legs .section-heading h2{color:var(--legs);} #panel-run .section-heading h2{color:var(--run);}
 #panel-prog .section-heading h2{color:var(--prog);}
+#panel-log .section-heading h2{color:#c084fc;}
 #panel-phil .section-heading h2,#panel-timing .section-heading h2,#panel-tag .section-heading h2,#panel-food .section-heading h2{color:#34d399;}
 
 /* PHASE CARD (routine) */
@@ -1284,7 +1285,7 @@ a{touch-action:manipulation;}
     <button class="tab-btn"        data-tab="food"   onclick="switchTab('food')">🛒 Lebensmittel</button>
   </div>
   <div class="tab-nav-inner nav-group" id="nav-log">
-    <button class="tab-btn active" data-tab="panel-log" onclick="switchTab('panel-log')">📝 Tages-Log</button>
+    <button class="tab-btn active" data-tab="log" onclick="switchTab('log')">📝 Tages-Log</button>
   </div>
   <div class="tab-nav-inner nav-group" id="nav-training">
 
@@ -3008,7 +3009,7 @@ a{touch-action:manipulation;}
     <button class="bottom-nav-btn"        data-tab="food"   onclick="switchTab('food')"><span class="nav-dot"></span><span class="nav-icon">🛒</span>Einkauf</button>
 </div>
   <div class="bottom-nav-group" id="bnav-log">
-    <button class="bottom-nav-btn active" data-tab="panel-log" onclick="switchTab('panel-log')"><span class="nav-dot"></span><span class="nav-icon">📝</span>Log</button>
+    <button class="bottom-nav-btn active" data-tab="log" onclick="switchTab('log')"><span class="nav-dot"></span><span class="nav-icon">📝</span>Log</button>
     <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span>0%</span></button>
   </div>
   <div class="bottom-nav-group" id="bnav-training">
@@ -3048,7 +3049,7 @@ function switchMode(mode){
   // progress ring only relevant for routine
   document.getElementById('progressMini').style.visibility = mode==='routine'?'visible':'hidden';
   // activate first tab of the mode
-  const firstTab = mode==='routine'?'am':mode==='training'?'week':mode==='log'?'panel-log':'phil';
+  const firstTab = mode==='routine'?'am':mode==='training'?'week':mode==='log'?'log':'phil';
   switchTab(firstTab);
   window.scrollTo({top:0,behavior:'smooth'});
 }
