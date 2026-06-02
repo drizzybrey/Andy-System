@@ -169,14 +169,7 @@
 }
 .fab-sub-btn:active { background: var(--border); color: #fff; }
 
-/* toggle row in panel */
-.fab-toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
+
 .fab-toggle-label {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
@@ -677,68 +670,9 @@ a{touch-action:manipulation;}
 .toggle-text.on { color: var(--post); }
 
 /* desktop water bar (≥641px) */
-@media (min-width: 641px) {
-  .water-bar-desktop {
-    position: sticky;
-    top: calc(108px + env(safe-area-inset-top));
-    z-index: 98;
-    background: rgba(10,10,15,.95); backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border);
-    padding: 0 20px;
-  }
-  .water-bar-inner {
-    max-width: 960px; margin: 0 auto;
-    display: flex; align-items: center; gap: 16px; height: 52px;
-  }
-  .wbar-label {
-    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
-    letter-spacing: .07em; text-transform: uppercase; color: var(--post);
-  }
-  .wbar-track {
-    flex: 1; height: 6px; background: var(--faint); border-radius: 3px; overflow: hidden;
-  }
-  .wbar-fill {
-    height: 100%; background: linear-gradient(90deg, var(--post), #06d6c8);
-    border-radius: 3px; transition: width .4s ease; width: 0%;
-  }
-  .wbar-amount {
-    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 800; color: var(--text);
-  }
-  .wbar-add {
-    display: flex; align-items: center; gap: 6px;
-    background: rgba(6,182,212,.12); border: 1.5px solid var(--post);
-    color: var(--post); font-family: 'Inter', sans-serif;
-    font-size: 12px; font-weight: 800;
-    padding: 7px 16px; border-radius: 10px; cursor: pointer; transition: all .15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .wbar-add:active { background: rgba(6,182,212,.22); }
-  .wbar-sub {
-    background: none; border: 1px solid var(--border); color: var(--muted);
-    font-size: 14px; font-weight: 700; width: 28px; height: 28px;
-    border-radius: 7px; cursor: pointer; transition: all .15s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .wbar-toggle-wrap {
-    display: flex; align-items: center; gap: 6px; cursor: pointer;
-  }
-  .wbar-toggle-pill {
-    width: 32px; height: 18px; border-radius: 9px;
-    background: var(--faint); border: 1px solid var(--border);
-    position: relative; transition: background .2s; flex-shrink: 0;
-  }
-  .wbar-toggle-pill::after {
-    content: ''; position: absolute; width: 12px; height: 12px;
-    border-radius: 50%; background: var(--muted); top: 2px; left: 2px;
-    transition: transform .2s, background .2s;
-  }
-  .wbar-toggle-pill.on { background: rgba(6,182,212,.2); border-color: var(--post); }
-  .wbar-toggle-pill.on::after { transform: translateX(14px); background: var(--post); }
-  .wbar-toggle-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; color: var(--muted); white-space: nowrap; }
-  .wbar-toggle-label.on { color: var(--post); }
-}
+
 @media (max-width: 640px) {
-  .water-bar-desktop { display: none !important; }
+
   .water-toast { bottom: calc(86px + env(safe-area-inset-bottom)); }
 }
 
@@ -815,17 +749,6 @@ a{touch-action:manipulation;}
 
 
 
-
-    <span class="wbar-amount" id="wbarAmount">0 ml</span>
-    <button class="wbar-sub" onclick="waterSub()" title="-250 ml">−</button>
-    <button class="wbar-add" onclick="waterAdd()">🥛 +250 ml</button>
-    <div class="wbar-toggle-wrap" onclick="toggleTrainingDay()">
-      <div class="wbar-toggle-pill" id="wbarToggle"></div>
-      <span class="wbar-toggle-label" id="wbarLabel">Training</span>
-    </div>
-  </div>
-</div>
-
 <!-- MOBILE WATER SHEET -->
 <div class="water-sheet-overlay" id="waterSheet" onclick="closeWaterSheet(event)">
   <div class="water-sheet">
@@ -848,8 +771,6 @@ a{touch-action:manipulation;}
       <button class="water-sub-btn" onclick="waterSub()">−</button>
       <button class="water-add-btn" onclick="waterAdd()">🥛 +250 ml</button>
     </div>
-    <div class="water-toggle-row" onclick="toggleTrainingDay()">
-      <div class="toggle-pill" id="sheetToggle"></div>
       <span class="toggle-text" id="sheetToggleLabel">Normaltag (3,0 L)</span>
     </div>
   </div>
@@ -2418,16 +2339,13 @@ restoreState();
 
 // ── WATER TRACKER ──
 const GLASS_ML      = 250;
-const GOAL_NORMAL   = 3000;
-const GOAL_TRAINING = 3500;
-let waterMl        = parseInt(localStorage.getItem('andyWaterMl') || '0');
-let isTrainingDay  = localStorage.getItem('andyTrainingDay') === 'true';
-let toastTimeout   = null;
-let reminderInt    = null;
+const GOAL_ML = 3000;
+let waterMl      = parseInt(localStorage.getItem('andyWaterMl') || '0');
+let toastTimeout = null;
+let reminderInt  = null;
 
-function getGoal() { return isTrainingDay ? GOAL_TRAINING : GOAL_NORMAL; }
+function getGoal() { return GOAL_ML; }
 function saveWater() { localStorage.setItem('andyWaterMl', String(waterMl)); }
-function saveTraining() { localStorage.setItem('andyTrainingDay', String(isTrainingDay)); }
 
 function renderWater() {
   const goal = getGoal();
@@ -2441,19 +2359,11 @@ function renderWater() {
   const fabAmt = document.getElementById('fabAmount');
   if (fabAmt) fabAmt.textContent = fmtMl(waterMl);
   const fabGoal = document.getElementById('fabGoal');
-  if (fabGoal) fabGoal.textContent = 'von ' + (goal/1000).toFixed(1).replace('.',',') + ' L · ' + pct + '%';
+  if (fabGoal) fabGoal.textContent = pct + '% von 3 L';
   const fabBar = document.getElementById('fabBarFill');
   if (fabBar) fabBar.style.width = pct + '%';
   const fabTog = document.getElementById('fabToggle');
-  if (fabTog) fabTog.classList.toggle('on', isTrainingDay);
-  const fabLbl = document.getElementById('fabToggleLabel');
-  if (fabLbl) { fabLbl.textContent = isTrainingDay ? 'Trainingstag' : 'Normaltag'; fabLbl.className = 'fab-toggle-label' + (isTrainingDay ? ' on' : ''); }
-
-  // FAB ring glow based on progress
-  const fabBtn = document.getElementById('fabBtn');
-  if (fabBtn) {
-    const opacity = 0.25 + (pct / 100) * 0.4;
-    fabBtn.style.boxShadow = `0 4px 20px rgba(6,182,212,${opacity}), 0 2px 8px rgba(0,0,0,.4)`;
+  if (fabTog) fabTog.classList.toggle('on', isTrainingDay);, 0 2px 8px rgba(0,0,0,.4)`;
   }
 }
 
@@ -2477,11 +2387,7 @@ function waterSub() {
   saveWater(); renderWater();
 }
 
-function toggleTrainingDay() {
-  isTrainingDay = !isTrainingDay;
-  saveTraining(); renderWater();
-  showToast(isTrainingDay ? '🏋️ Trainingstag — Ziel: 3,5 L' : '😴 Normaltag — Ziel: 3,0 L', 2200);
-}
+
 
 function openWaterSheet() {
   // legacy — now handled by FAB
@@ -2571,11 +2477,6 @@ _b.style.display = 'none'; // reset, controlled by JS above
   <div class="water-fab-panel" id="fabPanel">
     <div class="fab-panel-top">
       <span class="fab-panel-title">💧 Wasser</span>
-      <div class="fab-toggle-row" onclick="toggleTrainingDay()">
-        <div class="toggle-pill" id="fabToggle" style="margin-right:6px;"></div>
-        <span class="fab-toggle-label" id="fabToggleLabel">Normal</span>
-      </div>
-    </div>
     <div>
       <div class="fab-panel-amount" id="fabAmount">0 ml</div>
       <div class="fab-panel-goal" id="fabGoal">von 3,0 L</div>
