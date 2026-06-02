@@ -3728,21 +3728,31 @@ async function pushLogToCloud(entry) {
       water:     entry.water    || null,
       score:     entry.score    || null
     };
+    console.log('Pushing to:', SB_ENDPOINT);
+    console.log('Payload:', JSON.stringify(payload));
     const res = await fetch(SB_ENDPOINT, {
       method: 'POST',
       headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
       body: JSON.stringify(payload)
     });
+    console.log('Response status:', res.status);
+    const responseText = await res.text();
+    console.log('Response body:', responseText);
     if (res.ok || res.status === 201 || res.status === 200) {
       setSyncStatus('synced');
     } else {
-      console.error('Supabase error:', await res.text());
+      console.error('Supabase error:', res.status, responseText);
       setSyncStatus('error');
+      // Show error detail in sync status
+      const el = document.getElementById('syncStatus');
+      if (el) el.textContent = '⚠️ ' + res.status + ': ' + responseText.slice(0,80);
       queueSync(entry);
     }
   } catch(e) {
-    console.warn('Offline:', e.message);
+    console.warn('Network error:', e.message);
     setSyncStatus('offline');
+    const el = document.getElementById('syncStatus');
+    if (el) el.textContent = '📴 ' + e.message;
     queueSync(entry);
   }
 }
@@ -3784,7 +3794,14 @@ async function pullFromCloud() {
     const res = await fetch(SB_ENDPOINT + '?select=*&order=date.desc&limit=90', {
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
     });
-    if (!res.ok) { setSyncStatus('error'); return; }
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Pull error:', res.status, errText);
+      setSyncStatus('error');
+      const el = document.getElementById('syncStatus');
+      if (el) el.textContent = '⚠️ Pull ' + res.status + ': ' + errText.slice(0,60);
+      return;
+    }
     const rows = await res.json();
     const logs = loadAllLogs();
     let added = 0;
