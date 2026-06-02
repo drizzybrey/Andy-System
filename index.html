@@ -3158,6 +3158,16 @@ function saveHrvEntry(score, date) {
   localStorage.setItem(HRV_KEY, String(score));
 }
 
+
+// Get today's date in local timezone (not UTC)
+function getLocalDateStr(date) {
+  const d = date || new Date();
+  const year  = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day   = String(d.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
+
 function getHrvColor(score) {
   if (score >= 7) return 'green';
   if (score >= 4) return 'yellow';
@@ -3212,7 +3222,7 @@ function previewHrv(val) {
 function submitHrv(val) {
   const score = parseFloat(val);
   if (!val || isNaN(score) || score < 1 || score > 10) return;
-  const today = new Date().toISOString().slice(0,10);
+  const today = getLocalDateStr();
   saveHrvEntry(score, today);
   renderHrvChart();
 }
@@ -3226,7 +3236,7 @@ function renderHrvChart() {
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().slice(0,10);
+    const dateStr = getLocalDateStr(d);
     const entry = hist.find(e => e.date === dateStr);
     const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
     days.push({ date: dateStr, score: entry ? entry.score : null, label: dayNames[d.getDay()] });
@@ -3260,7 +3270,7 @@ function toggleHrvInfo() {
 
 function initHrv() {
   // Restore today's value if already entered
-  const today = new Date().toISOString().slice(0,10);
+  const today = getLocalDateStr();
   const savedDate  = localStorage.getItem(HRV_DATE_KEY);
   const savedScore = localStorage.getItem(HRV_KEY);
   if (savedDate === today && savedScore) {
@@ -3290,7 +3300,7 @@ function saveLogEntry(date, entry) {
 }
 
 function getTodayLog() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = getLocalDateStr();
   const logs = loadAllLogs();
   return logs[today] || null;
 }
@@ -3336,7 +3346,7 @@ function selectMood(btn) {
 }
 
 function saveLog() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = getLocalDateStr();
   const sleep  = parseInt(document.getElementById('sleepSlider').value);
   const energy = parseInt(document.getElementById('energySlider').value);
   const body   = parseInt(document.getElementById('bodySlider').value);
@@ -3426,7 +3436,7 @@ function restoreLogToday() {
 
 // Auto-fill HRV and water pills
 function updateLogAutoPills() {
-  const today = new Date().toISOString().slice(0,10);
+  const today = getLocalDateStr();
   const savedHrvDate = localStorage.getItem('andyHrvDate');
   const savedHrv = localStorage.getItem('andyHrv') ||
                    (savedHrvDate === today ? localStorage.getItem('andyHrv') : null);
@@ -3470,7 +3480,7 @@ function renderLogCalendar() {
   if (!cal) return;
   const logs = loadAllLogs();
   const today = new Date();
-  const todayStr = today.toISOString().slice(0,10);
+  const todayStr = getLocalDateStr(today);
 
   cal.innerHTML = '';
 
@@ -3493,7 +3503,7 @@ function renderLogCalendar() {
   for (let i = 0; i < 35; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
-    const dateStr = d.toISOString().slice(0,10);
+    const dateStr = getLocalDateStr(d);
     const isFuture = d > today;
 
     const cell = document.createElement('div');
@@ -3522,7 +3532,7 @@ function renderTrendBars(containerId, key, color) {
   for (let i = 13; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().slice(0,10);
+    const dateStr = getLocalDateStr(d);
     const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
     const entry = logs[dateStr];
     let val = null;
