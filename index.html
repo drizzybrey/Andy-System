@@ -3374,10 +3374,12 @@ function saveLog() {
 
   saveLogEntry(today, entry);
 
-  // Visual feedback
+  // Visual feedback — check if this is an update or new entry
+  const existingEntry = getTodayLog();
+  const isUpdate = existingEntry !== null;
   const btn = document.getElementById('logSaveBtn');
   if (btn) {
-    btn.textContent = '✅ Gespeichert';
+    btn.textContent = isUpdate ? '🔄 Aktualisiert' : '✅ Gespeichert';
     btn.classList.add('saved');
     setTimeout(() => {
       btn.textContent = 'Eintrag speichern';
@@ -3391,7 +3393,7 @@ function saveLog() {
   checkLogInsight();
 
   // Push to Supabase
-  pushLogToCloud(entry);
+  pushLogToCloud(entry, isUpdate);
 }
 
 // Restore today's log if already saved
@@ -3712,17 +3714,18 @@ function setSyncStatus(state) {
   const el = document.getElementById('syncStatus');
   if (!el) return;
   const map = {
-    syncing: ['🔄', 'Synchronisiert...', 'var(--muted)'],
-    synced:  ['☁️', 'Gespeichert',       '#22c55e'],
-    offline: ['📴', 'Offline',           'var(--muted)'],
-    error:   ['⚠️', 'Sync-Fehler',       '#f87171']
+    syncing:  ['🔄', 'Synchronisiert...', 'var(--muted)'],
+    synced:   ['☁️', 'Gespeichert',       '#22c55e'],
+    updated:  ['☁️', 'Aktualisiert',      '#22c55e'],
+    offline:  ['📴', 'Offline',           'var(--muted)'],
+    error:    ['⚠️', 'Sync-Fehler',       '#f87171']
   };
   const [icon, label, color] = map[state] || map.error;
   el.textContent = icon + ' ' + label;
   el.style.color = color;
 }
 
-async function pushLogToCloud(entry) {
+async function pushLogToCloud(entry, isUpdate) {
   setSyncStatus('syncing');
   try {
     const payload = {
@@ -3746,7 +3749,7 @@ async function pushLogToCloud(entry) {
       body: JSON.stringify(payload)
     });
     if (res.ok || res.status === 201 || res.status === 200) {
-      setSyncStatus('synced');
+      setSyncStatus(isUpdate ? 'updated' : 'synced');
     } else {
       const responseText = await res.text();
       console.error('Supabase error:', res.status, responseText);
