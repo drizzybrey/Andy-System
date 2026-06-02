@@ -322,6 +322,72 @@
   text-align: center;
 }
 
+
+/* HRV info toggle */
+.hrv-info-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  margin-top: 8px;
+  margin-bottom: 2px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color .2s, border-color .2s;
+}
+.hrv-info-toggle:hover { color: var(--text); border-color: var(--muted); }
+
+.hrv-info-box {
+  display: none;
+  background: rgba(255,255,255,.03);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.hrv-info-box.open { display: block; }
+.hrv-info-box strong { color: var(--text); }
+.hrv-info-box h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--post);
+  margin: 10px 0 4px;
+}
+.hrv-info-box h4:first-child { margin-top: 0; }
+.hrv-scale {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.hrv-scale-item {
+  flex: 1;
+  min-width: 60px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+.hrv-scale-item.green  { background: rgba(34,197,94,.12);  color: #4ade80; }
+.hrv-scale-item.yellow { background: rgba(250,204,21,.12); color: #fde047; }
+.hrv-scale-item.red    { background: rgba(239,68,68,.12);  color: #f87171; }
+.hrv-scale-item span { display: block; font-size: 9px; font-weight: 500; opacity: .8; margin-top: 2px; }
+
 </style>
 <script>
 // Register inline service worker for offline support
@@ -930,6 +996,7 @@ a{touch-action:manipulation;}
         <div>
           <div class="hrv-title">📊 HRV — Tagesbewertung</div>
           <div class="hrv-subtitle">Elite HRV Score eingeben · Polar H10 liegend vor dem Aufstehen messen</div>
+          <button class="hrv-info-toggle" onclick="toggleHrvInfo()">ℹ️ Was ist HRV?</button>
         </div>
         <div class="hrv-input-wrap">
           <input class="hrv-score-input" id="hrvInput" type="number"
@@ -938,6 +1005,26 @@ a{touch-action:manipulation;}
           <div class="hrv-score-label">Score<br>1–10</div>
         </div>
       </div>
+
+      <!-- HRV Info Box -->
+      <div class="hrv-info-box" id="hrvInfoBox">
+        <h4>Was ist HRV?</h4>
+        <strong>Herzratenvariabilität (HRV)</strong> misst die Schwankung der Zeit zwischen zwei aufeinanderfolgenden Herzschlägen — in Millisekunden. Kein gleichmäßiger Herzschlag ist ein Zeichen von Stärke: ein gesundes, erholes Nervensystem variiert mehr. Ein gestresstes oder erschöpftes Nervensystem schlägt starr und gleichmäßig.
+
+        <h4>Wie messen?</h4>
+        <strong>Polar H10 anlegen</strong> direkt nach dem Aufwachen — noch liegend, vor dem Aufstehen. <strong>Elite HRV App</strong> öffnen, 2-Minuten-Messung starten. Ruhig atmen, nicht bewegen. Der Score den die App ausgibt (1–10) ist dein heutiger Wert — relativ zu deiner persönlichen Baseline, nicht zu einem absoluten Standard. Nach 2–3 Wochen regelmäßiger Messung wird der Score erst wirklich aussagekräftig.
+
+        <h4>Was bedeutet der Score?</h4>
+        <div class="hrv-scale">
+          <div class="hrv-scale-item green">7–10<span>Volles Training</span></div>
+          <div class="hrv-scale-item yellow">4–6<span>Moderat</span></div>
+          <div class="hrv-scale-item red">1–3<span>Regeneration</span></div>
+        </div>
+
+        <h4>Wofür wird er genutzt?</h4>
+        Statt zu raten ob du heute hart trainieren kannst, hast du eine <strong>objektive Zahl</strong>. Niedriger HRV nach einer schlechten Nacht oder intensiver Woche → Intensität reduzieren, du sparst Energie statt sie zu verschwenden. Hoher HRV → maximaler Einsatz, dein Körper ist bereit. Über Wochen erkennst du <strong>Muster</strong>: wie reagierst du auf Sauna, auf Laufen, auf wenig Schlaf?
+      </div>
+
       <div class="hrv-rec" id="hrvRec">
         <span class="hrv-rec-icon" id="hrvRecIcon"></span>
         <div class="hrv-rec-text">
@@ -2606,6 +2693,16 @@ function renderHrvChart() {
       <div class="hrv-bar-day">${day.label}</div>
     </div>`;
   }).join('');
+}
+
+
+function toggleHrvInfo() {
+  const box = document.getElementById('hrvInfoBox');
+  const btn = document.querySelector('.hrv-info-toggle');
+  if (!box) return;
+  const isOpen = box.classList.contains('open');
+  box.classList.toggle('open', !isOpen);
+  if (btn) btn.textContent = isOpen ? 'ℹ️ Was ist HRV?' : '✕ Schließen';
 }
 
 function initHrv() {
