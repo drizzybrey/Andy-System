@@ -66,8 +66,8 @@ window.addEventListener('load', () => {
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#0a0a0f; --surface:#111118; --card:#16161f; --border:#252530; --border-light:#1e1e2a;
-  --text:#f0f0f5; --muted:#6b6b80; --faint:#2a2a38;
+  --bg:#060608; --surface:#0e0e14; --card:#111119; --border:#1e1e28; --border-light:#181820;
+  --text:#f0f0f5; --muted:#6b6b80; --faint:#1c1c26;
   --am:#f97316; --pre:#22c55e; --post:#06b6d4; --pm:#818cf8;
   --upper:#f97316; --legs:#22c55e; --run:#06b6d4; --prog:#a78bfa;
   --am-bg:rgba(249,115,22,.08); --pre-bg:rgba(34,197,94,.08); --post-bg:rgba(6,182,212,.08); --pm-bg:rgba(129,140,248,.08);
@@ -91,7 +91,7 @@ body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-s
   display:flex;align-items:center;gap:14px;
   height:58px;
 }
-.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.02em;background:linear-gradient(90deg,var(--am),#facc15,var(--pm));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.02em;color:#ffffff;white-space:nowrap;}
 
 /* MODE SWITCHER */
 .mode-switch{margin-left:auto;display:flex;gap:3px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:3px;}
@@ -2107,7 +2107,6 @@ body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-s
 <!-- BOTTOM NAV: two groups -->
 <nav class="bottom-nav">
   <div class="bottom-nav-group active" id="bnav-routine" style="display:flex;">
-  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-r">0%</span></button>
 
   <button class="bottom-nav-btn active" data-tab="am" onclick="switchTab('am')">
     <span class="nav-dot"></span>
@@ -2130,16 +2129,18 @@ body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-s
     Abend
   </button>
 
-  </div>
+  
+  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-r">0%</span></button>
+</div>
   <div class="bottom-nav-group" id="bnav-ernaehrung">
-  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-bnav-ernaehrung">0%</span></button>
     <button class="bottom-nav-btn active" data-tab="phil"   onclick="switchTab('phil')"><span class="nav-dot"></span><span class="nav-icon">🌱</span>Basis</button>
     <button class="bottom-nav-btn"        data-tab="timing" onclick="switchTab('timing')"><span class="nav-dot"></span><span class="nav-icon">⏱</span>Timing</button>
     <button class="bottom-nav-btn"        data-tab="tag"    onclick="switchTab('tag')"><span class="nav-dot"></span><span class="nav-icon">📅</span>Beispiel</button>
     <button class="bottom-nav-btn"        data-tab="food"   onclick="switchTab('food')"><span class="nav-dot"></span><span class="nav-icon">🛒</span>Einkauf</button>
-  </div>
+  
+  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-bnav-ernaehrung">0%</span></button>
+</div>
   <div class="bottom-nav-group" id="bnav-training">
-  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-bnav-training">0%</span></button>
 
   <button class="bottom-nav-btn active" data-tab="week"  onclick="switchTab('week')"><span class="nav-icon">📅</span>Woche</button>
   <button class="bottom-nav-btn"        data-tab="upper" onclick="switchTab('upper')"><span class="nav-icon">💪</span>Oberkörper</button>
@@ -2147,7 +2148,9 @@ body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-s
   <button class="bottom-nav-btn"        data-tab="run"   onclick="switchTab('run')"><span class="nav-icon">🏃</span>Laufen</button>
   <button class="bottom-nav-btn"        data-tab="prog"  onclick="switchTab('prog')"><span class="nav-icon">📈</span>Prog.</button>
 
-  </div>
+  
+  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-bnav-training">0%</span></button>
+</div>
 </nav>
 
 <script>
