@@ -2854,6 +2854,32 @@ a{touch-action:manipulation;}
           oninput="updateSlider('sleep', this.value)">
       </div>
 
+
+      <!-- Aufstehzeit -->
+      <div class="log-slider-card">
+        <div class="log-slider-header">
+          <div class="log-slider-label">⏰ Aufgestanden um</div>
+          <div style="font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);font-weight:500;" id="wakeTimeDisplay">—</div>
+        </div>
+        <input type="time" id="wakeTimeInput"
+          style="
+            width:100%;
+            background:var(--faint);
+            border:1px solid var(--border);
+            border-radius:10px;
+            color:var(--text);
+            font-family:'Inter',sans-serif;
+            font-size:18px;
+            font-weight:700;
+            padding:12px 14px;
+            outline:none;
+            -webkit-appearance:none;
+            color-scheme:dark;
+          "
+          onchange="updateWakeTime(this.value)"
+        >
+      </div>
+
       <!-- Energie -->
       <div class="log-slider-card">
         <div class="log-slider-header">
@@ -3276,6 +3302,16 @@ function sliderColor(val) {
   return 'red';
 }
 
+
+function updateWakeTime(val) {
+  const display = document.getElementById('wakeTimeDisplay');
+  if (!display || !val) return;
+  // Format: 07:30 → "07:30 Uhr"
+  const [h, m] = val.split(':');
+  display.textContent = h + ':' + m + ' Uhr';
+  display.style.color = 'var(--text)';
+}
+
 function updateSlider(type, val) {
   const el = document.getElementById(type + 'Val');
   if (el) { el.textContent = val; el.className = 'log-slider-val ' + sliderColor(val); }
@@ -3310,9 +3346,13 @@ function saveLog() {
   const activeTraining = document.querySelector('.log-training-btn.active');
   const activeMood     = document.querySelector('.log-mood-btn.active');
 
+  const wakeInput = document.getElementById('wakeTimeInput');
+  const wakeTime = wakeInput ? wakeInput.value : null;
+
   const entry = {
     date: today,
     sleep, energy, body,
+    wakeTime,
     training: activeTraining ? activeTraining.dataset.val : null,
     mood:     activeMood     ? activeMood.dataset.val     : null,
     note,
@@ -3369,6 +3409,15 @@ function restoreLogToday() {
   // Note
   const noteEl = document.getElementById('logNote');
   if (noteEl && entry.note) noteEl.value = entry.note;
+
+  // Wake time
+  if (entry.wakeTime) {
+    const wakeInput = document.getElementById('wakeTimeInput');
+    if (wakeInput) {
+      wakeInput.value = entry.wakeTime;
+      updateWakeTime(entry.wakeTime);
+    }
+  }
 }
 
 // Auto-fill HRV and water pills
@@ -3520,6 +3569,18 @@ function renderTrendInsights() {
   const avgEnergy = entries.reduce((s,e) => s + e.energy, 0) / entries.length;
   insights.push(`Ø Schlaf: <strong>${avgSleep.toFixed(1)}</strong> · Ø Energie: <strong>${avgEnergy.toFixed(1)}</strong>`);
 
+  // Average wake time
+  const wakeTimes = entries.filter(e => e.wakeTime).map(e => {
+    const [h,m] = e.wakeTime.split(':').map(Number);
+    return h * 60 + m;
+  });
+  if (wakeTimes.length >= 3) {
+    const avgWakeMins = Math.round(wakeTimes.reduce((a,b)=>a+b,0) / wakeTimes.length);
+    const wh = Math.floor(avgWakeMins / 60).toString().padStart(2,'0');
+    const wm = (avgWakeMins % 60).toString().padStart(2,'0');
+    insights.push(`Ø Aufstehzeit: <strong>${wh}:${wm} Uhr</strong>`);
+  }
+
   // Training type vs energy
   const byTraining = {};
   entries.forEach(e => {
@@ -3580,6 +3641,7 @@ function openLogDetail(dateStr, entry) {
   const moodLabels = {'top':'🔥 Top','gut':'😊 Gut','neutral':'😐 Neutral','schlecht':'😔 Schlecht'};
 
   const rows = [
+    ['⏰ Aufgestanden', entry.wakeTime ? entry.wakeTime + ' Uhr' : '—'],
     ['😴 Schlaf', entry.sleep + '/10'],
     ['⚡ Energie', entry.energy + '/10'],
     ['💪 Körpergefühl', entry.body + '/10'],
