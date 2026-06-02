@@ -2813,6 +2813,7 @@ a{touch-action:manipulation;}
   <div class="section-heading">
     <h2>Tages-Log</h2>
     <p>2 Minuten täglich — dein persönlicher Fortschrittsspiegel.</p>
+    <div id="syncStatus" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--muted);margin-top:4px;">☁️ Verbinde...</div>
   </div>
 
   <!-- Smart Insight -->
@@ -3378,6 +3379,9 @@ function saveLog() {
   renderLogCalendar();
   renderLogTrends();
   checkLogInsight();
+
+  // Push to Supabase
+  pushLogToCloud(entry);
 }
 
 // Restore today's log if already saved
@@ -3683,6 +3687,137 @@ function switchLogTab(tab) {
 }
 
 // ── INIT LOG ──────────────────────────────────────────────────────────
+
+// ── SUPABASE SYNC ──
+const SB_URL = 'https://nmztcqsirzjhmduqijdh.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tenRjcXNpcnpqaG1kdXFpamRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MzA4ODYsImV4cCI6MjA5NjAwNjg4Nn0.P1KoF5HQ64wdVaKeXvQO2UF4LpJB_N97WcaEF25kaZo';
+const SB_ENDPOINT = SB_URL + '/rest/v1/logs';
+const SB_HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SB_KEY,
+  'Authorization': 'Bearer ' + SB_KEY
+};
+
+function setSyncStatus(state) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  const map = {
+    syncing: ['🔄', 'Synchronisiert...', 'var(--muted)'],
+    synced:  ['☁️', 'Gespeichert',       '#22c55e'],
+    offline: ['📴', 'Offline',           'var(--muted)'],
+    error:   ['⚠️', 'Sync-Fehler',       '#f87171']
+  };
+  const [icon, label, color] = map[state] || map.error;
+  el.textContent = icon + ' ' + label;
+  el.style.color = color;
+}
+
+async function pushLogToCloud(entry) {
+  setSyncStatus('syncing');
+  try {
+    const payload = {
+      date:      entry.date,
+      sleep:     entry.sleep,
+      energy:    entry.energy,
+      body:      entry.body,
+      wake_time: entry.wakeTime || null,
+      training:  entry.training || null,
+      mood:      entry.mood     || null,
+      note:      entry.note     || null,
+      hrv:       entry.hrv      || null,
+      water:     entry.water    || null,
+      score:     entry.score    || null
+    };
+    const res = await fetch(SB_ENDPOINT, {
+      method: 'POST',
+      headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok || res.status === 201 || res.status === 200) {
+      setSyncStatus('synced');
+    } else {
+      console.error('Supabase error:', await res.text());
+      setSyncStatus('error');
+      queueSync(entry);
+    }
+  } catch(e) {
+    console.warn('Offline:', e.message);
+    setSyncStatus('offline');
+    queueSync(entry);
+  }
+}
+
+function queueSync(entry) {
+  let q = JSON.parse(localStorage.getItem('andySyncQueue') || '[]');
+  q = q.filter(e => e.date !== entry.date);
+  q.push(entry);
+  localStorage.setItem('andySyncQueue', JSON.stringify(q));
+}
+
+async function flushSyncQueue() {
+  const q = JSON.parse(localStorage.getItem('andySyncQueue') || '[]');
+  if (!q.length) return;
+  const remaining = [];
+  for (const entry of q) {
+    try {
+      const res = await fetch(SB_ENDPOINT, {
+        method: 'POST',
+        headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify({
+          date: entry.date, sleep: entry.sleep, energy: entry.energy,
+          body: entry.body, wake_time: entry.wakeTime || null,
+          training: entry.training || null, mood: entry.mood || null,
+          note: entry.note || null, hrv: entry.hrv || null,
+          water: entry.water || null, score: entry.score || null
+        })
+      });
+      if (!res.ok && res.status !== 201) remaining.push(entry);
+    } catch { remaining.push(entry); }
+  }
+  localStorage.setItem('andySyncQueue', JSON.stringify(remaining));
+  if (remaining.length === 0) setSyncStatus('synced');
+}
+
+async function pullFromCloud() {
+  setSyncStatus('syncing');
+  try {
+    const res = await fetch(SB_ENDPOINT + '?select=*&order=date.desc&limit=90', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+    });
+    if (!res.ok) { setSyncStatus('error'); return; }
+    const rows = await res.json();
+    const logs = loadAllLogs();
+    let added = 0;
+    rows.forEach(row => {
+      if (!logs[row.date]) {
+        logs[row.date] = {
+          date: row.date, sleep: row.sleep, energy: row.energy,
+          body: row.body, wakeTime: row.wake_time, training: row.training,
+          mood: row.mood, note: row.note, hrv: row.hrv,
+          water: row.water, score: row.score
+        };
+        added++;
+      }
+    });
+    if (added > 0) {
+      localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+      renderLogCalendar();
+      renderLogTrends();
+      checkLogInsight();
+    }
+    setSyncStatus('synced');
+  } catch(e) {
+    console.warn('Pull failed:', e.message);
+    setSyncStatus('offline');
+  }
+}
+
+window.addEventListener('online', () => { flushSyncQueue(); });
+window.addEventListener('load',   () => {
+  if (navigator.onLine) { flushSyncQueue(); pullFromCloud(); }
+  else setSyncStatus('offline');
+});
+
 function initLog() {
   restoreLogToday();
   updateLogAutoPills();
