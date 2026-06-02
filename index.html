@@ -17,6 +17,185 @@
 
 #installBanner.show { display: block !important; }
 
+
+/* ── FLOATING WATER BUTTON (FAB) ── */
+.water-fab {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  right: 20px;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* FAB button */
+.water-fab-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--post);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(6,182,212,.35), 0 2px 8px rgba(0,0,0,.4);
+  transition: transform .2s, box-shadow .2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  gap: 1px;
+}
+.water-fab-btn:active {
+  transform: scale(.92);
+  box-shadow: 0 2px 10px rgba(6,182,212,.25);
+}
+.water-fab-icon { font-size: 20px; line-height: 1; }
+.water-fab-pct  {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(0,0,0,.7);
+  line-height: 1;
+}
+
+/* FAB popup panel */
+.water-fab-panel {
+  background: #1c1c1e;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  padding: 16px 18px 14px;
+  width: 220px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  animation: fabPop .2s cubic-bezier(.34,1.56,.64,1);
+  transform-origin: bottom right;
+}
+.water-fab-panel.open { display: flex; }
+@keyframes fabPop {
+  from { opacity: 0; transform: scale(.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Panel content */
+.fab-panel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fab-panel-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--post);
+}
+.fab-panel-amount {
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.02em;
+  line-height: 1;
+  text-align: center;
+}
+.fab-panel-goal {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* progress bar inside panel */
+.fab-panel-bar {
+  height: 4px;
+  background: var(--faint);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.fab-panel-bar-fill {
+  height: 100%;
+  background: var(--post);
+  border-radius: 2px;
+  transition: width .4s ease;
+  width: 0%;
+}
+
+/* panel buttons */
+.fab-panel-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fab-add-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(6,182,212,.18);
+  border: 1.5px solid var(--post);
+  color: var(--post);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.fab-add-btn:active { background: rgba(6,182,212,.32); }
+.fab-sub-btn {
+  width: 38px; height: 38px;
+  background: var(--faint);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.fab-sub-btn:active { background: var(--border); color: #fff; }
+
+/* toggle row in panel */
+.fab-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.fab-toggle-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--muted);
+}
+.fab-toggle-label.on { color: var(--post); }
+
+/* on desktop: position beside content */
+@media (min-width: 641px) {
+  .water-fab {
+    bottom: 28px;
+    right: 28px;
+  }
+  .water-fab-panel { width: 240px; }
+}
+
+/* Hide the old mobile water sheet on FAB mode */
+.water-sheet-overlay { display: none !important; }
+
 </style>
 <script>
 // Register inline service worker for offline support
@@ -63,7 +242,7 @@ window.addEventListener('load', () => {
   }
 });
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#000000; --surface:#0a0a0a; --card:#1c1c1e; --border:rgba(255,255,255,.1); --border-light:rgba(255,255,255,.06);
@@ -76,7 +255,7 @@ window.addEventListener('load', () => {
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
 button{touch-action:manipulation;}
 a{touch-action:manipulation;}
 .check-item{touch-action:manipulation;}
@@ -101,11 +280,11 @@ a{touch-action:manipulation;}
   display:flex;align-items:center;gap:14px;
   height:58px;
 }
-.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.02em;color:#ffffff;white-space:nowrap;}
+.logo{font-family:'Inter',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.01em;color:#ffffff;white-space:nowrap;}
 
 /* MODE SWITCHER */
 .mode-switch{margin-left:auto;display:flex;gap:3px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:3px;}
-.mode-btn{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:7px 16px;border:none;background:none;color:var(--muted);border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.mode-btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:700;padding:7px 16px;border:none;background:none;color:var(--muted);border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .mode-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3);}
 .mode-btn.active[data-mode="routine"]{color:var(--am);}
 .mode-btn.active[data-mode="training"]{color:var(--run);}
@@ -116,8 +295,8 @@ a{touch-action:manipulation;}
 .progress-ring{transform:rotate(-90deg);width:34px;height:34px;}
 .progress-ring-bg{fill:none;stroke:var(--faint);stroke-width:3;}
 .progress-ring-fill{fill:none;stroke:url(#ringGrad);stroke-width:3;stroke-linecap:round;stroke-dasharray:88;stroke-dashoffset:88;transition:stroke-dashoffset .6s ease;}
-.progress-ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif;}
-.reset-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Instrument Sans',sans-serif;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.progress-ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif;}
+.reset-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Inter',sans-serif;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .reset-btn:hover{color:var(--text);border-color:var(--muted);}
 
 /* TAB NAV */
@@ -132,7 +311,7 @@ a{touch-action:manipulation;}
 }
 .tab-nav::-webkit-scrollbar{display:none;}
 .tab-nav-inner{max-width:960px;margin:0 auto;display:flex;padding:0 14px;gap:2px;}
-.tab-btn{display:flex;align-items:center;gap:7px;padding:13px 15px;font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;white-space:nowrap;margin-bottom:-1px;}
+.tab-btn{display:flex;align-items:center;gap:7px;padding:13px 15px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;white-space:nowrap;margin-bottom:-1px;}
 .tab-btn:hover{color:var(--text);}
 .tab-btn[data-tab="am"].active{color:var(--am);border-bottom-color:var(--am);}
 .tab-btn[data-tab="pre"].active{color:var(--pre);border-bottom-color:var(--pre);}
@@ -143,7 +322,7 @@ a{touch-action:manipulation;}
 .tab-btn[data-tab="run"].active{color:var(--run);border-bottom-color:var(--run);}
 .tab-btn[data-tab="prog"].active{color:var(--prog);border-bottom-color:var(--prog);}
 .tab-btn[data-tab="phil"].active,.tab-btn[data-tab="timing"].active,.tab-btn[data-tab="tag"].active,.tab-btn[data-tab="food"].active{color:#34d399;border-bottom-color:#34d399;}
-.tab-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--faint);color:var(--muted);transition:all .2s;font-family:'Syne',sans-serif;}
+.tab-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--faint);color:var(--muted);transition:all .2s;font-family:'Inter',sans-serif;}
 .tab-btn.active .tab-badge{color:var(--text);}
 .tab-btn[data-tab="am"].active .tab-badge{background:var(--am-bg);color:var(--am);}
 .tab-btn[data-tab="pre"].active .tab-badge{background:var(--pre-bg);color:var(--pre);}
@@ -163,9 +342,9 @@ a{touch-action:manipulation;}
 
 /* SECTION HEADING */
 .section-heading{margin-bottom:20px;}
-.section-heading h2{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.03em;}
+.section-heading h2{font-family:'Inter',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.02em;}
 .section-heading p{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.6;}
-.section-heading .duration{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
+.section-heading .duration{font-size:12px;color:var(--muted);letter-spacing:.02em;text-transform:uppercase;}
 #panel-am .section-heading h2{color:var(--am);} #panel-pre .section-heading h2{color:var(--pre);}
 #panel-post .section-heading h2{color:var(--post);} #panel-pm .section-heading h2{color:var(--pm);}
 #panel-week .section-heading h2,#panel-upper .section-heading h2{color:var(--upper);}
@@ -179,10 +358,10 @@ a{touch-action:manipulation;}
 .phase-card-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;}
 .phase-icon{font-size:18px;line-height:1;flex-shrink:0;}
 .phase-title-wrap{flex:1;min-width:0;}
-.phase-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.phase-title{font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .phase-sub{font-size:11px;color:var(--muted);margin-top:1px;}
 .phase-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.phase-prog{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--muted);}
+.phase-prog{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--muted);}
 .phase-prog.complete{color:var(--pre);}
 .phase-chevron{width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10px;transition:transform .2s;flex-shrink:0;}
 .phase-card.open .phase-chevron{transform:rotate(180deg);}
@@ -204,7 +383,7 @@ a{touch-action:manipulation;}
 .check-item.done .check-name{text-decoration:line-through;color:var(--muted);}
 .check-detail{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.55;}
 .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
-.tag{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:6px;font-family:'Syne',sans-serif;}
+.tag{font-size:9px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:6px;font-family:'Inter',sans-serif;}
 .t-suppl{background:rgba(250,204,21,.1);color:#facc15;}
 .t-aktiv{background:rgba(249,115,22,.1);color:var(--am);}
 .t-passiv{background:rgba(249,115,22,.06);color:#fb923c;}
@@ -230,7 +409,7 @@ a{touch-action:manipulation;}
 
 /* REGEN TABLE */
 .regen-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
-.regen-table th{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:600;}
+.regen-table th{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:600;}
 .regen-table td{padding:8px 10px;border-bottom:1px solid var(--border-light);vertical-align:top;line-height:1.5;}
 .regen-table tr:last-child td{border-bottom:none;}
 .regen-table td:first-child{font-weight:600;white-space:nowrap;color:var(--post);}
@@ -242,18 +421,18 @@ a{touch-action:manipulation;}
 .day-card:hover{transform:translateY(-2px);}
 .day-card.upper{border-top:3px solid var(--upper);} .day-card.legs{border-top:3px solid var(--legs);}
 .day-card.run{border-top:3px solid var(--run);} .day-card.rest{border-top:3px solid var(--faint);}
-.day-name{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.day-name{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);}
 .day-type{font-size:20px;margin:6px 0 4px;}
-.day-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;}
+.day-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;}
 .day-card.upper .day-label{color:var(--upper);} .day-card.legs .day-label{color:var(--legs);}
 .day-card.run .day-label{color:var(--run);} .day-card.rest .day-label{color:var(--muted);}
 .day-detail{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4;}
 .flex-note{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:20px;}
-.flex-note h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text);}
+.flex-note h3{font-family:'Inter',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text);}
 .flex-table{width:100%;border-collapse:collapse;font-size:12.5px;}
 .flex-table td{padding:6px 8px;border-bottom:1px solid var(--border-light);vertical-align:top;line-height:1.5;}
 .flex-table tr:last-child td{border-bottom:none;}
-.flex-table td:first-child{font-family:'Syne',sans-serif;font-weight:700;color:var(--upper);white-space:nowrap;width:80px;}
+.flex-table td:first-child{font-family:'Inter',sans-serif;font-weight:700;color:var(--upper);white-space:nowrap;width:80px;}
 
 /* TRAINING cards */
 .training-grid{display:grid;gap:10px;}
@@ -261,16 +440,16 @@ a{touch-action:manipulation;}
 .training-grid .full{grid-column:1 / -1;}
 .t-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
 .t-card-header{padding:14px 16px;border-bottom:1px solid var(--border);}
-.t-card-header h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.01em;}
+.t-card-header h3{font-family:'Inter',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.01em;}
 .t-card-header p{font-size:12px;color:var(--muted);margin-top:3px;}
 .t-card.upper .t-card-header h3{color:var(--upper);} .t-card.legs .t-card-header h3{color:var(--legs);}
 .t-card.run .t-card-header h3{color:var(--run);} .t-card.prog .t-card-header h3{color:var(--prog);}
 .ex-row{display:grid;grid-template-columns:1fr auto;align-items:start;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border-light);}
 .ex-row:last-child{border-bottom:none;}
-.ex-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--muted);margin-right:8px;}
+.ex-num{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--muted);margin-right:8px;}
 .ex-name{font-size:14px;font-weight:600;}
 .ex-detail{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
-.ex-badge{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap;align-self:start;margin-top:2px;}
+.ex-badge{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap;align-self:start;margin-top:2px;}
 .badge-upper{background:var(--upper-bg);color:var(--upper);} .badge-legs{background:var(--legs-bg);color:var(--legs);}
 .badge-run{background:var(--run-bg);color:var(--run);} .badge-neu{background:rgba(167,139,250,.12);color:var(--prog);}
 .badge-warn{background:rgba(239,68,68,.1);color:#f87171;}
@@ -278,25 +457,25 @@ a{touch-action:manipulation;}
 /* RUN PROTOCOL */
 .run-week{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
 .run-week-header{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
-.run-week-header h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--run);flex:1;}
-.run-week-header .wk-badge{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--run-bg);color:var(--run);}
+.run-week-header h3{font-family:'Inter',sans-serif;font-size:14px;font-weight:800;color:var(--run);flex:1;}
+.run-week-header .wk-badge{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--run-bg);color:var(--run);}
 .run-week-header .chevron{font-size:10px;color:var(--muted);transition:transform .2s;}
 .run-week.open .chevron{transform:rotate(180deg);}
 .run-week-body{display:none;}
 .run-week.open .run-week-body{display:block;}
 .run-session{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border-light);}
 .run-session:last-child{border-bottom:none;}
-.run-day-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;padding-top:2px;}
+.run-day-label{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;padding-top:2px;}
 .run-desc{font-size:13px;font-weight:500;}
 .run-sub{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
-.run-vol{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--run);white-space:nowrap;padding-top:2px;}
+.run-vol{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--run);white-space:nowrap;padding-top:2px;}
 
 /* PROG TABLE */
 .prog-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-.prog-table th{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.prog-table th{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);}
 .prog-table td{padding:8px 10px;border-bottom:1px solid var(--border-light);vertical-align:top;line-height:1.5;}
 .prog-table tr:last-child td{border-bottom:none;}
-.prog-table td:first-child{font-weight:600;color:var(--upper);font-family:'Syne',sans-serif;}
+.prog-table td:first-child{font-weight:600;color:var(--upper);font-family:'Inter',sans-serif;}
 
 /* MOBILE BOTTOM NAV */
 @media (max-width:640px){
@@ -313,7 +492,7 @@ a{touch-action:manipulation;}
 }
   .bottom-nav-group{display:none;}
   .bottom-nav-group.active{display:flex;}
-  .bottom-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px 7px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:'Instrument Sans',sans-serif;font-size:9px;transition:color .2s;position:relative;}
+  .bottom-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px 7px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif;font-size:9px;transition:color .2s;position:relative;}
   .nav-dot{width:4px;height:4px;border-radius:50%;background:currentColor;position:absolute;top:5px;opacity:0;transition:opacity .2s;}
   .bottom-nav-btn.active .nav-dot{opacity:1;}
   .nav-icon{font-size:17px;line-height:1;}
@@ -383,7 +562,7 @@ a{touch-action:manipulation;}
   position: fixed; bottom: calc(90px + env(safe-area-inset-bottom)); left: 50%;
   transform: translateX(-50%) translateY(14px);
   background: rgba(6,182,212,.18); border: 1px solid var(--post);
-  color: var(--post); font-family: 'Syne', sans-serif;
+  color: var(--post); font-family: 'Inter', sans-serif;
   font-size: 13px; font-weight: 700;
   padding: 9px 20px; border-radius: 30px;
   backdrop-filter: blur(12px); opacity: 0; pointer-events: none;
@@ -414,7 +593,7 @@ a{touch-action:manipulation;}
   background: var(--border); margin: 0 auto 18px;
 }
 .water-sheet-title {
-  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
   letter-spacing: .06em; text-transform: uppercase; color: var(--post);
   text-align: center; margin-bottom: 6px;
 }
@@ -437,15 +616,15 @@ a{touch-action:manipulation;}
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 .water-ring-ml {
-  font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+  font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 800;
   color: var(--text); letter-spacing: -.03em; line-height: 1;
 }
 .water-ring-goal {
-  font-size: 11px; color: var(--muted); font-family: 'Syne', sans-serif;
+  font-size: 11px; color: var(--muted); font-family: 'Inter', sans-serif;
   font-weight: 600; margin-top: 2px;
 }
 .water-ring-pct {
-  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
   color: var(--post); margin-top: 6px;
 }
 
@@ -456,7 +635,7 @@ a{touch-action:manipulation;}
 .water-add-btn {
   display: flex; align-items: center; gap: 8px;
   background: rgba(6,182,212,.15); border: 2px solid var(--post);
-  color: var(--post); font-family: 'Syne', sans-serif;
+  color: var(--post); font-family: 'Inter', sans-serif;
   font-size: 16px; font-weight: 800;
   padding: 14px 32px; border-radius: 16px;
   cursor: pointer; transition: all .15s;
@@ -466,7 +645,7 @@ a{touch-action:manipulation;}
 .water-add-btn:active { transform: scale(.95); background: rgba(6,182,212,.28); }
 .water-sub-btn {
   background: var(--faint); border: 1px solid var(--border);
-  color: var(--muted); font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700;
+  color: var(--muted); font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 700;
   width: 48px; height: 48px; border-radius: 12px;
   cursor: pointer; transition: all .15s; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
@@ -492,7 +671,7 @@ a{touch-action:manipulation;}
 .toggle-pill.on { background: rgba(6,182,212,.2); border-color: var(--post); }
 .toggle-pill.on::after { transform: translateX(20px); background: var(--post); }
 .toggle-text {
-  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; color: var(--muted);
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: var(--muted);
   cursor: pointer;
 }
 .toggle-text.on { color: var(--post); }
@@ -512,7 +691,7 @@ a{touch-action:manipulation;}
     display: flex; align-items: center; gap: 16px; height: 52px;
   }
   .wbar-label {
-    font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
     letter-spacing: .07em; text-transform: uppercase; color: var(--post);
   }
   .wbar-track {
@@ -523,12 +702,12 @@ a{touch-action:manipulation;}
     border-radius: 3px; transition: width .4s ease; width: 0%;
   }
   .wbar-amount {
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 800; color: var(--text);
   }
   .wbar-add {
     display: flex; align-items: center; gap: 6px;
     background: rgba(6,182,212,.12); border: 1.5px solid var(--post);
-    color: var(--post); font-family: 'Syne', sans-serif;
+    color: var(--post); font-family: 'Inter', sans-serif;
     font-size: 12px; font-weight: 800;
     padding: 7px 16px; border-radius: 10px; cursor: pointer; transition: all .15s;
     -webkit-tap-highlight-color: transparent;
@@ -555,7 +734,7 @@ a{touch-action:manipulation;}
   }
   .wbar-toggle-pill.on { background: rgba(6,182,212,.2); border-color: var(--post); }
   .wbar-toggle-pill.on::after { transform: translateX(14px); background: var(--post); }
-  .wbar-toggle-label { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .wbar-toggle-label { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 700; color: var(--muted); white-space: nowrap; }
   .wbar-toggle-label.on { color: var(--post); }
 }
 @media (max-width: 640px) {
@@ -637,11 +816,6 @@ a{touch-action:manipulation;}
 
 
 
-<!-- DESKTOP WATER BAR -->
-<div class="water-bar-desktop" id="waterBarDesktop">
-  <div class="water-bar-inner">
-    <span class="wbar-label">💧 Wasser</span>
-    <div class="wbar-track"><div class="wbar-fill" id="wbarFill"></div></div>
     <span class="wbar-amount" id="wbarAmount">0 ml</span>
     <button class="wbar-sub" onclick="waterSub()" title="-250 ml">−</button>
     <button class="wbar-add" onclick="waterAdd()">🥛 +250 ml</button>
@@ -1548,7 +1722,7 @@ a{touch-action:manipulation;}
   </div>
 
   <!-- 7-Tage Visual -->
-  <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Beispielwoche visuell</p>
+  <p style="font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Beispielwoche visuell</p>
   <div class="week-grid">
     <div class="day-card upper"><div class="day-name">Tag 1</div><div class="day-type">💪</div><div class="day-label">OK–A</div><div class="day-detail">Horizontal</div></div>
     <div class="day-card run">  <div class="day-name">Tag 2</div><div class="day-type">🏃</div><div class="day-label">Laufen</div><div class="day-detail">Zone 2</div></div>
@@ -2138,17 +2312,12 @@ a{touch-action:manipulation;}
     <span class="nav-icon">🌙</span>
     Abend
   </button>
-
-  
-  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-r">0%</span></button>
 </div>
   <div class="bottom-nav-group" id="bnav-ernaehrung">
     <button class="bottom-nav-btn active" data-tab="phil"   onclick="switchTab('phil')"><span class="nav-dot"></span><span class="nav-icon">🌱</span>Basis</button>
     <button class="bottom-nav-btn"        data-tab="timing" onclick="switchTab('timing')"><span class="nav-dot"></span><span class="nav-icon">⏱</span>Timing</button>
     <button class="bottom-nav-btn"        data-tab="tag"    onclick="switchTab('tag')"><span class="nav-dot"></span><span class="nav-icon">📅</span>Beispiel</button>
     <button class="bottom-nav-btn"        data-tab="food"   onclick="switchTab('food')"><span class="nav-dot"></span><span class="nav-icon">🛒</span>Einkauf</button>
-  
-  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-bnav-ernaehrung">0%</span></button>
 </div>
   <div class="bottom-nav-group" id="bnav-training">
 
@@ -2157,9 +2326,6 @@ a{touch-action:manipulation;}
   <button class="bottom-nav-btn"        data-tab="legs"  onclick="switchTab('legs')"><span class="nav-icon">🦵</span>Beine</button>
   <button class="bottom-nav-btn"        data-tab="run"   onclick="switchTab('run')"><span class="nav-icon">🏃</span>Laufen</button>
   <button class="bottom-nav-btn"        data-tab="prog"  onclick="switchTab('prog')"><span class="nav-icon">📈</span>Prog.</button>
-
-  
-  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-bnav-training">0%</span></button>
 </div>
 </nav>
 
@@ -2267,37 +2433,28 @@ function renderWater() {
   const goal = getGoal();
   const pct  = Math.min(Math.round(waterMl / goal * 100), 100);
 
-  // desktop bar
-  const fill = document.getElementById('wbarFill');
-  if (fill) fill.style.width = pct + '%';
-  const amt = document.getElementById('wbarAmount');
-  if (amt) amt.textContent = fmtMl(waterMl) + ' / ' + (goal/1000).toFixed(1).replace('.',',') + ' L';
-  const wbt = document.getElementById('wbarToggle');
-  if (wbt) wbt.classList.toggle('on', isTrainingDay);
-  const wbl = document.getElementById('wbarLabel');
-  if (wbl) { wbl.textContent = isTrainingDay ? 'Training' : 'Normal'; wbl.className = 'wbar-toggle-label' + (isTrainingDay ? ' on' : ''); }
+  // FAB button
+  const fabPct = document.getElementById('fabPct');
+  if (fabPct) fabPct.textContent = pct + '%';
 
-  // mobile sheet ring (circ = 2π×52.5 ≈ 329.9)
-  const circ = 330;
-  const offset = circ - (circ * pct / 100);
-  const rf = document.getElementById('waterRingFill');
-  if (rf) rf.style.strokeDashoffset = offset;
-  const rm = document.getElementById('waterRingMl');
-  if (rm) rm.textContent = fmtMl(waterMl);
-  const rg = document.getElementById('waterRingGoal');
-  if (rg) rg.textContent = '/ ' + (goal/1000).toFixed(1).replace('.',',') + ' L';
-  const rp = document.getElementById('waterRingPct');
-  if (rp) rp.textContent = pct + '% vom Tagesziel';
-  const st = document.getElementById('sheetToggle');
-  if (st) st.classList.toggle('on', isTrainingDay);
-  const sl = document.getElementById('sheetToggleLabel');
-  if (sl) { sl.textContent = isTrainingDay ? 'Trainingstag (3,5 L)' : 'Normaltag (3,0 L)'; sl.className = 'toggle-text' + (isTrainingDay ? ' on' : ''); }
+  // FAB panel
+  const fabAmt = document.getElementById('fabAmount');
+  if (fabAmt) fabAmt.textContent = fmtMl(waterMl);
+  const fabGoal = document.getElementById('fabGoal');
+  if (fabGoal) fabGoal.textContent = 'von ' + (goal/1000).toFixed(1).replace('.',',') + ' L · ' + pct + '%';
+  const fabBar = document.getElementById('fabBarFill');
+  if (fabBar) fabBar.style.width = pct + '%';
+  const fabTog = document.getElementById('fabToggle');
+  if (fabTog) fabTog.classList.toggle('on', isTrainingDay);
+  const fabLbl = document.getElementById('fabToggleLabel');
+  if (fabLbl) { fabLbl.textContent = isTrainingDay ? 'Trainingstag' : 'Normaltag'; fabLbl.className = 'fab-toggle-label' + (isTrainingDay ? ' on' : ''); }
 
-  // mobile nav pct badges
-  ['bnav-water-pct-r','bnav-water-pct-bnav-training','bnav-water-pct-bnav-ernaehrung'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = pct + '%';
-  });
+  // FAB ring glow based on progress
+  const fabBtn = document.getElementById('fabBtn');
+  if (fabBtn) {
+    const opacity = 0.25 + (pct / 100) * 0.4;
+    fabBtn.style.boxShadow = `0 4px 20px rgba(6,182,212,${opacity}), 0 2px 8px rgba(0,0,0,.4)`;
+  }
 }
 
 function fmtMl(ml) {
@@ -2327,13 +2484,24 @@ function toggleTrainingDay() {
 }
 
 function openWaterSheet() {
-  document.getElementById('waterSheet').classList.add('open');
+  // legacy — now handled by FAB
+  toggleFabPanel();
 }
-function closeWaterSheet(e) {
-  if (!e || e.target === document.getElementById('waterSheet')) {
-    document.getElementById('waterSheet').classList.remove('open');
+function closeWaterSheet(e) {}
+
+function toggleFabPanel() {
+  const panel = document.getElementById('fabPanel');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+}
+
+// Close FAB panel when tapping outside
+document.addEventListener('click', function(e) {
+  const fab = document.getElementById('waterFab');
+  if (fab && !fab.contains(e.target)) {
+    document.getElementById('fabPanel').classList.remove('open');
   }
-}
+});
 
 function showToast(msg, dur) {
   const t = document.getElementById('waterToast');
@@ -2374,14 +2542,14 @@ setTimeout(checkWaterReminder, 4000);
   display:none; position:fixed; bottom:0; left:0; right:0; z-index:1000;
   background:rgba(0,0,0,.97); border-top:1px solid #252530;
   padding:16px 20px calc(16px + env(safe-area-inset-bottom));
-  font-family:'Instrument Sans',sans-serif;
+  font-family:'Inter',sans-serif;
   backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
   animation: slideUp .3s ease;
 ">
   <div style="display:flex;align-items:flex-start;gap:12px;">
     <span style="font-size:36px;line-height:1;flex-shrink:0;">💪</span>
     <div style="flex:1;">
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:#f0f0f5;margin-bottom:4px;">Als App installieren</div>
+      <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:15px;color:#f0f0f5;margin-bottom:4px;">Als App installieren</div>
       <div style="font-size:12px;color:#6b6b80;line-height:1.5;">Tippe auf <strong style="color:#f0f0f5;">Teilen</strong> <span style="font-size:14px;">⬆️</span> und dann auf <strong style="color:#f0f0f5;">"Zum Home-Bildschirm"</strong> — dann läuft Andy's System wie eine echte App.</div>
     </div>
     <button onclick="document.getElementById('installBanner').style.display='none';localStorage.setItem('pwa-banner-dismissed','1')" style="
@@ -2395,6 +2563,38 @@ document.getElementById('installBanner').style.display = 'block';
 const _b = document.getElementById('installBanner');
 _b.style.display = 'none'; // reset, controlled by JS above
 </script>
+
+
+<!-- FLOATING WATER FAB -->
+<div class="water-fab" id="waterFab">
+  <!-- Popup panel (above button) -->
+  <div class="water-fab-panel" id="fabPanel">
+    <div class="fab-panel-top">
+      <span class="fab-panel-title">💧 Wasser</span>
+      <div class="fab-toggle-row" onclick="toggleTrainingDay()">
+        <div class="toggle-pill" id="fabToggle" style="margin-right:6px;"></div>
+        <span class="fab-toggle-label" id="fabToggleLabel">Normal</span>
+      </div>
+    </div>
+    <div>
+      <div class="fab-panel-amount" id="fabAmount">0 ml</div>
+      <div class="fab-panel-goal" id="fabGoal">von 3,0 L</div>
+    </div>
+    <div class="fab-panel-bar">
+      <div class="fab-panel-bar-fill" id="fabBarFill"></div>
+    </div>
+    <div class="fab-panel-btns">
+      <button class="fab-sub-btn" onclick="waterSub()">−</button>
+      <button class="fab-add-btn" onclick="waterAdd()">🥛 +250 ml</button>
+    </div>
+  </div>
+
+  <!-- FAB button -->
+  <button class="water-fab-btn" id="fabBtn" onclick="toggleFabPanel()">
+    <span class="water-fab-icon">💧</span>
+    <span class="water-fab-pct" id="fabPct">0%</span>
+  </button>
+</div>
 
 </body>
 </html>
