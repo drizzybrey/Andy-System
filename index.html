@@ -2362,8 +2362,11 @@ function renderWater() {
   if (fabGoal) fabGoal.textContent = pct + '% von 3 L';
   const fabBar = document.getElementById('fabBarFill');
   if (fabBar) fabBar.style.width = pct + '%';
-  const fabTog = document.getElementById('fabToggle');
-  if (fabTog) fabTog.classList.toggle('on', isTrainingDay);, 0 2px 8px rgba(0,0,0,.4)`;
+  // FAB ring glow based on progress
+  const fabBtn = document.getElementById('fabBtn');
+  if (fabBtn) {
+    const opacity = 0.25 + (pct / 100) * 0.4;
+    fabBtn.style.boxShadow = `0 4px 20px rgba(6,182,212,${opacity}), 0 2px 8px rgba(0,0,0,.4)`;
   }
 }
 
