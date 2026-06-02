@@ -388,6 +388,353 @@
 .hrv-scale-item.red    { background: rgba(239,68,68,.12);  color: #f87171; }
 .hrv-scale-item span { display: block; font-size: 9px; font-weight: 500; opacity: .8; margin-top: 2px; }
 
+
+/* ── TAGES-LOG ── */
+.log-today { display: flex; flex-direction: column; gap: 10px; }
+
+/* Slider rows */
+.log-slider-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.log-slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.log-slider-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.log-slider-val {
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  min-width: 32px;
+  text-align: right;
+  transition: color .2s;
+}
+.log-slider-val.green  { color: #22c55e; }
+.log-slider-val.yellow { color: #facc15; }
+.log-slider-val.red    { color: #ef4444; }
+
+input[type=range].log-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--faint);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range].log-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--post);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(6,182,212,.35);
+  transition: transform .15s;
+}
+input[type=range].log-slider:active::-webkit-slider-thumb { transform: scale(1.2); }
+
+/* Training type selector */
+.log-training-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+.log-training-btn {
+  background: var(--faint);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.log-training-btn.active {
+  background: rgba(6,182,212,.15);
+  border-color: var(--post);
+  color: var(--post);
+}
+.log-training-btn .btn-emoji { font-size: 18px; display: block; margin-bottom: 4px; }
+
+/* Mood selector */
+.log-mood-row {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+.log-mood-btn {
+  flex: 1;
+  background: var(--faint);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 4px;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.log-mood-btn .mood-emoji { font-size: 20px; display: block; margin-bottom: 4px; }
+.log-mood-btn.active { border-color: #facc15; color: #facc15; background: rgba(250,204,21,.1); }
+
+/* Note textarea */
+.log-note {
+  width: 100%;
+  background: var(--faint);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 12px 14px;
+  resize: none;
+  outline: none;
+  min-height: 72px;
+  transition: border-color .2s;
+}
+.log-note:focus { border-color: var(--post); }
+.log-note::placeholder { color: var(--muted); }
+
+/* Save button */
+.log-save-btn {
+  width: 100%;
+  background: var(--post);
+  border: none;
+  border-radius: 14px;
+  color: #000;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 16px;
+  cursor: pointer;
+  transition: opacity .2s, transform .15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.log-save-btn:active { transform: scale(.97); opacity: .85; }
+.log-save-btn.saved { background: #22c55e; }
+
+/* Auto-filled badge */
+.log-auto-row {
+  display: flex;
+  gap: 8px;
+}
+.log-auto-pill {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: 'Inter', sans-serif;
+}
+.log-auto-pill-label { font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+.log-auto-pill-val { font-size: 18px; font-weight: 800; color: var(--text); }
+.log-auto-pill-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+/* ── VERLAUF TAB ── */
+.log-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-bottom: 20px;
+}
+.log-cal-header {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  padding-bottom: 4px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.log-cal-day {
+  aspect-ratio: 1;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.log-cal-day:active { transform: scale(.92); }
+.log-cal-day.empty { background: none; }
+.log-cal-day.no-data { background: var(--faint); color: var(--muted); }
+.log-cal-day.green  { background: rgba(34,197,94,.25);  color: #4ade80; }
+.log-cal-day.yellow { background: rgba(250,204,21,.2);  color: #fde047; }
+.log-cal-day.red    { background: rgba(239,68,68,.2);   color: #f87171; }
+.log-cal-day.today  { box-shadow: 0 0 0 2px var(--post); }
+
+/* Trend charts */
+.log-trend-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.log-trend-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.log-trend-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 60px;
+}
+.log-trend-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.log-trend-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  min-height: 2px;
+  transition: height .4s ease;
+}
+.log-trend-bar.sleep  { background: var(--pm); }
+.log-trend-bar.energy { background: #facc15; }
+.log-trend-bar.hrv    { background: var(--post); }
+.log-trend-bar-lbl {
+  font-family: 'Inter', sans-serif;
+  font-size: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Detail popup */
+.log-detail-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 350;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.log-detail-overlay.open { display: flex; }
+.log-detail-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  width: 100%; max-width: 360px;
+  animation: fabPop .2s cubic-bezier(.34,1.56,.64,1);
+}
+.log-detail-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+.log-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}
+.log-detail-row:last-child { border-bottom: none; }
+.log-detail-key { color: var(--muted); }
+.log-detail-val { font-weight: 700; color: var(--text); }
+.log-detail-close {
+  width: 100%; margin-top: 16px;
+  background: var(--faint); border: none;
+  border-radius: 12px; padding: 12px;
+  color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smart insight banner */
+.log-insight {
+  display: none;
+  background: rgba(129,140,248,.08);
+  border: 1px solid rgba(129,140,248,.25);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #a5b4fc;
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+.log-insight.show { display: block; }
+.log-insight strong { color: #c7d2fe; }
+
+/* sub-tabs for log panel */
+.log-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--faint);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+.log-tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  border-radius: 9px;
+  padding: 8px 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.log-tab-btn.active {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+.log-sub-panel { display: none; }
+.log-sub-panel.active { display: block; }
+
 </style>
 <script>
 // Register inline service worker for offline support
@@ -481,6 +828,7 @@ a{touch-action:manipulation;}
 .mode-btn.active[data-mode="routine"]{color:var(--am);}
 .mode-btn.active[data-mode="training"]{color:var(--run);}
 .mode-btn.active[data-mode="ernaehrung"]{color:#34d399;}
+.mode-btn.active[data-mode="log"]{color:#c084fc;}
 
 .progress-mini{display:flex;align-items:center;gap:8px;margin-left:14px;}
 .progress-ring-wrap{position:relative;width:34px;height:34px;flex-shrink:0;}
@@ -896,6 +1244,7 @@ a{touch-action:manipulation;}
       <button class="mode-btn active" data-mode="routine" onclick="switchMode('routine')">Routine</button>
       <button class="mode-btn" data-mode="training" onclick="switchMode('training')">Training</button>
       <button class="mode-btn" data-mode="ernaehrung" onclick="switchMode('ernaehrung')">Ernährung</button>
+      <button class="mode-btn" data-mode="log" onclick="switchMode('log')">Log</button>
     </div>
     <div class="progress-mini" id="progressMini">
       <div class="progress-ring-wrap">
@@ -933,6 +1282,9 @@ a{touch-action:manipulation;}
     <button class="tab-btn"        data-tab="timing" onclick="switchTab('timing')">⏱ Timing</button>
     <button class="tab-btn"        data-tab="tag"    onclick="switchTab('tag')">📅 Beispieltag</button>
     <button class="tab-btn"        data-tab="food"   onclick="switchTab('food')">🛒 Lebensmittel</button>
+  </div>
+  <div class="tab-nav-inner nav-group" id="nav-log">
+    <button class="tab-btn active" data-tab="panel-log" onclick="switchTab('panel-log')">📝 Tages-Log</button>
   </div>
   <div class="tab-nav-inner nav-group" id="nav-training">
 
@@ -2453,6 +2805,175 @@ a{touch-action:manipulation;}
 
 </div><!-- end mode-ernaehrung -->
 
+
+<!-- ══ LOG MODE ══ -->
+<div class="mode-section" id="mode-log">
+<section id="panel-log" class="tab-panel active">
+  <div class="section-heading">
+    <h2>Tages-Log</h2>
+    <p>2 Minuten täglich — dein persönlicher Fortschrittsspiegel.</p>
+  </div>
+
+  <!-- Smart Insight -->
+  <div class="log-insight" id="logInsight"></div>
+
+  <!-- Sub-tabs -->
+  <div class="log-tabs">
+    <button class="log-tab-btn active" onclick="switchLogTab('heute')">📝 Heute</button>
+    <button class="log-tab-btn" onclick="switchLogTab('verlauf')">📅 Verlauf</button>
+    <button class="log-tab-btn" onclick="switchLogTab('trends')">📈 Trends</button>
+  </div>
+
+  <!-- ── HEUTE ── -->
+  <div class="log-sub-panel active" id="log-heute">
+    <div class="log-today">
+
+      <!-- Auto-filled: HRV + Wasser -->
+      <div class="log-auto-row">
+        <div class="log-auto-pill">
+          <div class="log-auto-pill-label">📊 HRV heute</div>
+          <div class="log-auto-pill-val" id="logHrvVal">—</div>
+          <div class="log-auto-pill-sub" id="logHrvSub">noch nicht gemessen</div>
+        </div>
+        <div class="log-auto-pill">
+          <div class="log-auto-pill-label">💧 Wasser</div>
+          <div class="log-auto-pill-val" id="logWaterVal">—</div>
+          <div class="log-auto-pill-sub" id="logWaterSub">von 3,0 L</div>
+        </div>
+      </div>
+
+      <!-- Schlafqualität -->
+      <div class="log-slider-card">
+        <div class="log-slider-header">
+          <div class="log-slider-label">😴 Schlafqualität</div>
+          <div class="log-slider-val" id="sleepVal">5</div>
+        </div>
+        <input type="range" class="log-slider" id="sleepSlider"
+          min="1" max="10" value="5"
+          oninput="updateSlider('sleep', this.value)">
+      </div>
+
+      <!-- Energie -->
+      <div class="log-slider-card">
+        <div class="log-slider-header">
+          <div class="log-slider-label">⚡ Energie heute</div>
+          <div class="log-slider-val" id="energyVal">5</div>
+        </div>
+        <input type="range" class="log-slider" id="energySlider"
+          min="1" max="10" value="5"
+          oninput="updateSlider('energy', this.value)">
+      </div>
+
+      <!-- Körpergefühl -->
+      <div class="log-slider-card">
+        <div class="log-slider-header">
+          <div class="log-slider-label">💪 Körpergefühl</div>
+          <div class="log-slider-val" id="bodyVal">5</div>
+        </div>
+        <input type="range" class="log-slider" id="bodySlider"
+          min="1" max="10" value="5"
+          oninput="updateSlider('body', this.value)">
+      </div>
+
+      <!-- Training heute -->
+      <div class="log-slider-card">
+        <div class="log-slider-header">
+          <div class="log-slider-label">🏋️ Training heute</div>
+        </div>
+        <div class="log-training-grid" id="logTrainingGrid">
+          <button class="log-training-btn" data-val="ok-a" onclick="selectTraining(this)">
+            <span class="btn-emoji">💪</span>OK–A
+          </button>
+          <button class="log-training-btn" data-val="ok-b" onclick="selectTraining(this)">
+            <span class="btn-emoji">🏋️</span>OK–B
+          </button>
+          <button class="log-training-btn" data-val="beine" onclick="selectTraining(this)">
+            <span class="btn-emoji">🦵</span>Beine
+          </button>
+          <button class="log-training-btn" data-val="laufen" onclick="selectTraining(this)">
+            <span class="btn-emoji">🏃</span>Laufen
+          </button>
+          <button class="log-training-btn" data-val="kombi" onclick="selectTraining(this)">
+            <span class="btn-emoji">⚡</span>Kombi
+          </button>
+          <button class="log-training-btn" data-val="pause" onclick="selectTraining(this)">
+            <span class="btn-emoji">😴</span>Pause
+          </button>
+        </div>
+      </div>
+
+      <!-- Stimmung -->
+      <div class="log-slider-card">
+        <div class="log-slider-header">
+          <div class="log-slider-label">🧠 Stimmung</div>
+        </div>
+        <div class="log-mood-row" id="logMoodRow">
+          <button class="log-mood-btn" data-val="top" onclick="selectMood(this)">
+            <span class="mood-emoji">🔥</span>Top
+          </button>
+          <button class="log-mood-btn" data-val="gut" onclick="selectMood(this)">
+            <span class="mood-emoji">😊</span>Gut
+          </button>
+          <button class="log-mood-btn" data-val="neutral" onclick="selectMood(this)">
+            <span class="mood-emoji">😐</span>Neutral
+          </button>
+          <button class="log-mood-btn" data-val="schlecht" onclick="selectMood(this)">
+            <span class="mood-emoji">😔</span>Schlecht
+          </button>
+        </div>
+      </div>
+
+      <!-- Notiz -->
+      <div class="log-slider-card">
+        <div class="log-slider-header">
+          <div class="log-slider-label">📝 Notiz <span style="font-weight:400;color:var(--muted);font-size:11px;">optional</span></div>
+        </div>
+        <textarea class="log-note" id="logNote" placeholder="Was fällt dir heute auf? Muskelkater, besondere Leistung, wie du dich fühlst..." maxlength="280"></textarea>
+      </div>
+
+      <!-- Save -->
+      <button class="log-save-btn" id="logSaveBtn" onclick="saveLog()">Eintrag speichern</button>
+
+    </div>
+  </div>
+
+  <!-- ── VERLAUF ── -->
+  <div class="log-sub-panel" id="log-verlauf">
+    <div class="log-calendar" id="logCalendar"></div>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:4px;">
+      Tippe auf einen Tag für Details
+    </p>
+  </div>
+
+  <!-- ── TRENDS ── -->
+  <div class="log-sub-panel" id="log-trends">
+    <div class="log-trend-card">
+      <div class="log-trend-title">😴 Schlafqualität — letzte 14 Tage</div>
+      <div class="log-trend-bars" id="trendSleep"></div>
+    </div>
+    <div class="log-trend-card">
+      <div class="log-trend-title">⚡ Energie — letzte 14 Tage</div>
+      <div class="log-trend-bars" id="trendEnergy"></div>
+    </div>
+    <div class="log-trend-card">
+      <div class="log-trend-title">📊 HRV — letzte 14 Tage</div>
+      <div class="log-trend-bars" id="trendHrv"></div>
+    </div>
+    <div id="trendInsights" style="margin-top:6px;"></div>
+  </div>
+
+</section>
+</div><!-- end mode-log -->
+
+<!-- Log detail popup -->
+<div class="log-detail-overlay" id="logDetailOverlay" onclick="closeLogDetail(event)">
+  <div class="log-detail-card">
+    <div class="log-detail-date" id="logDetailDate"></div>
+    <div id="logDetailContent"></div>
+    <button class="log-detail-close" onclick="closeLogDetail()">Schließen</button>
+  </div>
+</div>
+
 </main>
 
 <!-- BOTTOM NAV: two groups -->
@@ -2486,6 +3007,10 @@ a{touch-action:manipulation;}
     <button class="bottom-nav-btn"        data-tab="tag"    onclick="switchTab('tag')"><span class="nav-dot"></span><span class="nav-icon">📅</span>Beispiel</button>
     <button class="bottom-nav-btn"        data-tab="food"   onclick="switchTab('food')"><span class="nav-dot"></span><span class="nav-icon">🛒</span>Einkauf</button>
 </div>
+  <div class="bottom-nav-group" id="bnav-log">
+    <button class="bottom-nav-btn active" data-tab="panel-log" onclick="switchTab('panel-log')"><span class="nav-dot"></span><span class="nav-icon">📝</span>Log</button>
+    <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span>0%</span></button>
+  </div>
   <div class="bottom-nav-group" id="bnav-training">
 
   <button class="bottom-nav-btn active" data-tab="week"  onclick="switchTab('week')"><span class="nav-icon">📅</span>Woche</button>
@@ -2523,7 +3048,7 @@ function switchMode(mode){
   // progress ring only relevant for routine
   document.getElementById('progressMini').style.visibility = mode==='routine'?'visible':'hidden';
   // activate first tab of the mode
-  const firstTab = mode==='routine'?'am':mode==='training'?'week':'phil';
+  const firstTab = mode==='routine'?'am':mode==='training'?'week':mode==='log'?'panel-log':'phil';
   switchTab(firstTab);
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -2721,6 +3246,393 @@ function initHrv() {
 }
 
 initHrv();
+
+// ── TAGES-LOG ──
+const LOG_KEY = 'andyLog';
+
+function loadAllLogs() {
+  try { return JSON.parse(localStorage.getItem(LOG_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+function saveLogEntry(date, entry) {
+  const logs = loadAllLogs();
+  logs[date] = entry;
+  localStorage.setItem(LOG_KEY, JSON.stringify(logs));
+}
+
+function getTodayLog() {
+  const today = new Date().toISOString().slice(0,10);
+  const logs = loadAllLogs();
+  return logs[today] || null;
+}
+
+// Slider color helper
+function sliderColor(val) {
+  val = parseInt(val);
+  if (val >= 7) return 'green';
+  if (val >= 4) return 'yellow';
+  return 'red';
+}
+
+function updateSlider(type, val) {
+  const el = document.getElementById(type + 'Val');
+  if (el) { el.textContent = val; el.className = 'log-slider-val ' + sliderColor(val); }
+  // Update slider track color
+  const slider = document.getElementById(type + 'Slider');
+  if (slider) {
+    const pct = ((val - 1) / 9) * 100;
+    const col = val >= 7 ? '#22c55e' : val >= 4 ? '#facc15' : '#ef4444';
+    slider.style.background = `linear-gradient(to right, ${col} ${pct}%, var(--faint) ${pct}%)`;
+  }
+}
+
+function selectTraining(btn) {
+  document.querySelectorAll('.log-training-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function selectMood(btn) {
+  document.querySelectorAll('.log-mood-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function saveLog() {
+  const today = new Date().toISOString().slice(0,10);
+  const sleep  = parseInt(document.getElementById('sleepSlider').value);
+  const energy = parseInt(document.getElementById('energySlider').value);
+  const body   = parseInt(document.getElementById('bodySlider').value);
+  const note   = document.getElementById('logNote').value.trim();
+  const hrv    = parseFloat(localStorage.getItem('andyHrv') || '0') || null;
+  const water  = parseInt(localStorage.getItem('andyWaterMl') || '0');
+
+  const activeTraining = document.querySelector('.log-training-btn.active');
+  const activeMood     = document.querySelector('.log-mood-btn.active');
+
+  const entry = {
+    date: today,
+    sleep, energy, body,
+    training: activeTraining ? activeTraining.dataset.val : null,
+    mood:     activeMood     ? activeMood.dataset.val     : null,
+    note,
+    hrv,
+    water,
+    score: Math.round((sleep + energy + body) / 3)
+  };
+
+  saveLogEntry(today, entry);
+
+  // Visual feedback
+  const btn = document.getElementById('logSaveBtn');
+  if (btn) {
+    btn.textContent = '✅ Gespeichert';
+    btn.classList.add('saved');
+    setTimeout(() => {
+      btn.textContent = 'Eintrag speichern';
+      btn.classList.remove('saved');
+    }, 2000);
+  }
+
+  // Refresh views
+  renderLogCalendar();
+  renderLogTrends();
+  checkLogInsight();
+}
+
+// Restore today's log if already saved
+function restoreLogToday() {
+  const entry = getTodayLog();
+  if (!entry) return;
+
+  // Sliders
+  ['sleep','energy','body'].forEach(key => {
+    const slider = document.getElementById(key + 'Slider');
+    if (slider && entry[key]) {
+      slider.value = entry[key];
+      updateSlider(key, entry[key]);
+    }
+  });
+
+  // Training
+  if (entry.training) {
+    const btn = document.querySelector(`.log-training-btn[data-val="${entry.training}"]`);
+    if (btn) btn.classList.add('active');
+  }
+
+  // Mood
+  if (entry.mood) {
+    const btn = document.querySelector(`.log-mood-btn[data-val="${entry.mood}"]`);
+    if (btn) btn.classList.add('active');
+  }
+
+  // Note
+  const noteEl = document.getElementById('logNote');
+  if (noteEl && entry.note) noteEl.value = entry.note;
+}
+
+// Auto-fill HRV and water pills
+function updateLogAutoPills() {
+  const today = new Date().toISOString().slice(0,10);
+  const savedHrvDate = localStorage.getItem('andyHrvDate');
+  const savedHrv = localStorage.getItem('andyHrv') ||
+                   (savedHrvDate === today ? localStorage.getItem('andyHrv') : null);
+
+  const hrvValEl = document.getElementById('logHrvVal');
+  const hrvSubEl = document.getElementById('logHrvSub');
+  if (hrvValEl) {
+    const score = parseFloat(localStorage.getItem('andyHrv'));
+    if (score && savedHrvDate === today) {
+      hrvValEl.textContent = score;
+      const col = score >= 7 ? '#22c55e' : score >= 4 ? '#facc15' : '#ef4444';
+      hrvValEl.style.color = col;
+      if (hrvSubEl) hrvSubEl.textContent = score >= 7 ? 'Guter Tag' : score >= 4 ? 'Moderater Tag' : 'Regeneration';
+    }
+  }
+
+  const waterMl = parseInt(localStorage.getItem('andyWaterMl') || '0');
+  const waterValEl = document.getElementById('logWaterVal');
+  const waterSubEl = document.getElementById('logWaterSub');
+  if (waterValEl) {
+    waterValEl.textContent = waterMl >= 1000
+      ? (waterMl/1000).toFixed(1).replace('.',',') + ' L'
+      : waterMl + ' ml';
+    const pct = Math.round(waterMl / 3000 * 100);
+    if (waterSubEl) waterSubEl.textContent = pct + '% von 3,0 L';
+    waterValEl.style.color = pct >= 100 ? '#22c55e' : pct >= 60 ? '#facc15' : '#ef4444';
+  }
+}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────
+function getDayColor(entry) {
+  if (!entry) return 'no-data';
+  const score = Math.round((entry.sleep + entry.energy + entry.body) / 3);
+  if (score >= 7) return 'green';
+  if (score >= 4) return 'yellow';
+  return 'red';
+}
+
+function renderLogCalendar() {
+  const cal = document.getElementById('logCalendar');
+  if (!cal) return;
+  const logs = loadAllLogs();
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+
+  cal.innerHTML = '';
+
+  // Day headers
+  ['Mo','Di','Mi','Do','Fr','Sa','So'].forEach(d => {
+    const h = document.createElement('div');
+    h.className = 'log-cal-header';
+    h.textContent = d;
+    cal.appendChild(h);
+  });
+
+  // Start from 5 weeks ago monday
+  const start = new Date(today);
+  start.setDate(today.getDate() - 34);
+  // Align to Monday
+  const dow = start.getDay();
+  const offset = dow === 0 ? 6 : dow - 1;
+  start.setDate(start.getDate() - offset);
+
+  for (let i = 0; i < 35; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const dateStr = d.toISOString().slice(0,10);
+    const isFuture = d > today;
+
+    const cell = document.createElement('div');
+
+    if (isFuture) {
+      cell.className = 'log-cal-day empty';
+    } else {
+      const entry = logs[dateStr];
+      const colorClass = getDayColor(entry);
+      cell.className = 'log-cal-day ' + colorClass + (dateStr === todayStr ? ' today' : '');
+      cell.textContent = d.getDate();
+      if (entry) {
+        cell.onclick = () => openLogDetail(dateStr, entry);
+      }
+    }
+    cal.appendChild(cell);
+  }
+}
+
+// ── TRENDS ────────────────────────────────────────────────────────────
+function renderTrendBars(containerId, key, color) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const logs = loadAllLogs();
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0,10);
+    const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+    const entry = logs[dateStr];
+    let val = null;
+    if (entry) {
+      val = key === 'hrv' ? entry.hrv : entry[key];
+    }
+    days.push({ label: dayNames[d.getDay()], val, date: d.getDate() });
+  }
+
+  const max = key === 'hrv' ? 10 : 10;
+  el.innerHTML = days.map(day => {
+    if (!day.val) {
+      return `<div class="log-trend-bar-wrap">
+        <div class="log-trend-bar ${key}" style="height:2px;opacity:.2"></div>
+        <div class="log-trend-bar-lbl">${day.label[0]}</div>
+      </div>`;
+    }
+    const h = Math.round((day.val / max) * 56);
+    return `<div class="log-trend-bar-wrap">
+      <div class="log-trend-bar ${key}" style="height:${h}px"></div>
+      <div class="log-trend-bar-lbl">${day.val}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLogTrends() {
+  renderTrendBars('trendSleep',  'sleep',  'sleep');
+  renderTrendBars('trendEnergy', 'energy', 'energy');
+  renderTrendBars('trendHrv',    'hrv',    'hrv');
+  renderTrendInsights();
+}
+
+function renderTrendInsights() {
+  const el = document.getElementById('trendInsights');
+  if (!el) return;
+  const logs = loadAllLogs();
+  const entries = Object.values(logs).filter(e => e.sleep && e.energy);
+
+  if (entries.length < 5) {
+    el.innerHTML = '<p style="font-size:12px;color:var(--muted);text-align:center;padding:10px">Mindestens 5 Einträge nötig für Trend-Auswertung.</p>';
+    return;
+  }
+
+  const insights = [];
+
+  // Avg sleep vs energy correlation
+  const avgSleep  = entries.reduce((s,e) => s + e.sleep, 0) / entries.length;
+  const avgEnergy = entries.reduce((s,e) => s + e.energy, 0) / entries.length;
+  insights.push(`Ø Schlaf: <strong>${avgSleep.toFixed(1)}</strong> · Ø Energie: <strong>${avgEnergy.toFixed(1)}</strong>`);
+
+  // Training type vs energy
+  const byTraining = {};
+  entries.forEach(e => {
+    if (!e.training) return;
+    if (!byTraining[e.training]) byTraining[e.training] = [];
+    byTraining[e.training].push(e.energy);
+  });
+  const trainingLabels = {'ok-a':'OK-A','ok-b':'OK-B','beine':'Beine','laufen':'Laufen','kombi':'Kombi','pause':'Pause'};
+  const bestTraining = Object.entries(byTraining)
+    .map(([k,v]) => ({ type: k, avg: v.reduce((a,b)=>a+b,0)/v.length }))
+    .sort((a,b) => b.avg - a.avg)[0];
+  if (bestTraining) {
+    insights.push(`Nach <strong>${trainingLabels[bestTraining.type]||bestTraining.type}</strong> ist deine Energie im Schnitt am höchsten (${bestTraining.avg.toFixed(1)})`);
+  }
+
+  el.innerHTML = insights.map(i =>
+    `<div style="background:rgba(129,140,248,.07);border:1px solid rgba(129,140,248,.2);border-radius:10px;padding:10px 12px;font-size:12px;color:#a5b4fc;margin-bottom:8px;line-height:1.5">${i}</div>`
+  ).join('');
+}
+
+// ── SMART INSIGHT ─────────────────────────────────────────────────────
+function checkLogInsight() {
+  const el = document.getElementById('logInsight');
+  if (!el) return;
+  const logs = loadAllLogs();
+  const entries = Object.values(logs).filter(e => e.sleep).slice(-7);
+  if (entries.length < 3) { el.classList.remove('show'); return; }
+
+  const avgHrv = entries.filter(e=>e.hrv).reduce((s,e)=>s+e.hrv,0) /
+                 (entries.filter(e=>e.hrv).length || 1);
+  const avgEnergy = entries.reduce((s,e)=>s+e.energy,0) / entries.length;
+  const avgSleep  = entries.reduce((s,e)=>s+e.sleep,0)  / entries.length;
+
+  let msg = null;
+  if (avgHrv > 0 && avgHrv < 5 && avgEnergy < 5) {
+    msg = '📉 Deine HRV und Energie sind diese Woche konstant niedrig. Erwäge einen extra Ruhetag und prüfe deinen Schlaf.';
+  } else if (avgSleep < 5) {
+    msg = '😴 Deine Schlafqualität war diese Woche unter 5. Das beeinträchtigt Regeneration und Trainingsleistung direkt.';
+  } else if (avgEnergy >= 8 && avgHrv >= 7) {
+    msg = '🔥 Top-Woche! HRV und Energie sind beide hoch — idealer Zeitpunkt für Progression im Training.';
+  }
+
+  if (msg) { el.innerHTML = msg; el.classList.add('show'); }
+  else { el.classList.remove('show'); }
+}
+
+// ── DETAIL POPUP ──────────────────────────────────────────────────────
+function openLogDetail(dateStr, entry) {
+  const overlay = document.getElementById('logDetailOverlay');
+  if (!overlay) return;
+  const d = new Date(dateStr + 'T12:00:00');
+  const days = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+  const months = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  document.getElementById('logDetailDate').textContent =
+    `${days[d.getDay()]}, ${d.getDate()}. ${months[d.getMonth()]} ${d.getFullYear()}`;
+
+  const trainingLabels = {'ok-a':'Oberkörper A','ok-b':'Oberkörper B','beine':'Beine','laufen':'Laufen','kombi':'Kombi','pause':'Ruhetag'};
+  const moodLabels = {'top':'🔥 Top','gut':'😊 Gut','neutral':'😐 Neutral','schlecht':'😔 Schlecht'};
+
+  const rows = [
+    ['😴 Schlaf', entry.sleep + '/10'],
+    ['⚡ Energie', entry.energy + '/10'],
+    ['💪 Körpergefühl', entry.body + '/10'],
+    ['📊 HRV', entry.hrv ? entry.hrv + '/10' : '—'],
+    ['💧 Wasser', entry.water ? Math.round(entry.water/100)/10 + ' L' : '—'],
+    ['🏋️ Training', trainingLabels[entry.training] || '—'],
+    ['🧠 Stimmung', moodLabels[entry.mood] || '—'],
+  ];
+
+  let html = rows.map(([k,v]) =>
+    `<div class="log-detail-row"><span class="log-detail-key">${k}</span><span class="log-detail-val">${v}</span></div>`
+  ).join('');
+
+  if (entry.note) {
+    html += `<div style="margin-top:10px;padding:10px;background:var(--faint);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.5">${entry.note}</div>`;
+  }
+
+  document.getElementById('logDetailContent').innerHTML = html;
+  overlay.classList.add('open');
+}
+
+function closeLogDetail(e) {
+  if (!e || e.target === document.getElementById('logDetailOverlay')) {
+    document.getElementById('logDetailOverlay').classList.remove('open');
+  }
+}
+
+// ── LOG SUB-TABS ──────────────────────────────────────────────────────
+function switchLogTab(tab) {
+  document.querySelectorAll('.log-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes(tab));
+  });
+  document.querySelectorAll('.log-sub-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('log-' + tab);
+  if (panel) panel.classList.add('active');
+
+  if (tab === 'verlauf') renderLogCalendar();
+  if (tab === 'trends')  renderLogTrends();
+}
+
+// ── INIT LOG ──────────────────────────────────────────────────────────
+function initLog() {
+  restoreLogToday();
+  updateLogAutoPills();
+  // Init sliders visual
+  ['sleep','energy','body'].forEach(k => {
+    const s = document.getElementById(k + 'Slider');
+    if (s) updateSlider(k, s.value);
+  });
+  checkLogInsight();
+}
+
+initLog();
+
 
 restoreState();
 
