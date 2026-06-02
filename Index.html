@@ -1,0 +1,2358 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Andy's System</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Andy">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIkFuZHkncyBTeXN0ZW0iLCAic2hvcnRfbmFtZSI6ICJBbmR5IiwgImRlc2NyaXB0aW9uIjogIlJvdXRpbmUgXHUwMGI3IFRyYWluaW5nIFx1MDBiNyBFcm5cdTAwZTRocnVuZyIsICJzdGFydF91cmwiOiAiLiIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGEwYTBmIiwgInRoZW1lX2NvbG9yIjogIiMwYTBhMGYiLCAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLCAiaWNvbnMiOiBbeyJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMic+PHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIHJ4PScxMDAnIGZpbGw9JyUyMzBhMGEwZicvPjx0ZXh0IHk9JzM4MCcgeD0nNjAnIGZvbnQtc2l6ZT0nMzYwJz5cdWQ4M2RcdWRjYWE8L3RleHQ+PC9zdmc+IiwgInNpemVzIjogIjUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIn1dfQ==">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230a0a0f'/><text y='380' x='60' font-size='360'>💪</text></svg>">
+<link rel="apple-touch-startup-image" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230a0a0f'/><text y='380' x='60' font-size='360'>💪</text></svg>">
+<style>
+  /* PWA safe area */
+  body { padding-bottom: env(safe-area-inset-bottom); }
+
+#installBanner.show { display: block !important; }
+
+</style>
+<script>
+// Register inline service worker for offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    try {
+      const swCode = `
+const CACHE = 'andy-v1';
+self.addEventListener('install', e => {
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(clients.claim());
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(cached => cached || fetch(e.request))
+  );
+});
+`;
+      const blob = new Blob([swCode], {type: 'application/javascript'});
+      const url  = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(url).then(() => {
+        // Cache this page for offline use
+        if (caches) {
+          caches.open('andy-v1').then(cache => {
+            cache.add(window.location.href).catch(()=>{});
+          });
+        }
+      }).catch(()=>{});
+    } catch(e) {}
+  });
+}
+// iOS standalone detection — show install banner once
+window.addEventListener('load', () => {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone;
+  const dismissed = localStorage.getItem('pwa-banner-dismissed');
+  if (isIOS && !isStandalone && !dismissed) {
+    setTimeout(() => {
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.classList.add('show');
+    }, 1500);
+  }
+});
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0f; --surface:#111118; --card:#16161f; --border:#252530; --border-light:#1e1e2a;
+  --text:#f0f0f5; --muted:#6b6b80; --faint:#2a2a38;
+  --am:#f97316; --pre:#22c55e; --post:#06b6d4; --pm:#818cf8;
+  --upper:#f97316; --legs:#22c55e; --run:#06b6d4; --prog:#a78bfa;
+  --am-bg:rgba(249,115,22,.08); --pre-bg:rgba(34,197,94,.08); --post-bg:rgba(6,182,212,.08); --pm-bg:rgba(129,140,248,.08);
+  --upper-bg:rgba(249,115,22,.08); --legs-bg:rgba(34,197,94,.08); --run-bg:rgba(6,182,212,.08);
+  --radius:14px; --radius-sm:9px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Instrument Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* HEADER */
+.app-header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;}
+.header-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:14px;height:58px;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.02em;background:linear-gradient(90deg,var(--am),#facc15,var(--pm));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+
+/* MODE SWITCHER */
+.mode-switch{margin-left:auto;display:flex;gap:3px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:3px;}
+.mode-btn{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:7px 16px;border:none;background:none;color:var(--muted);border-radius:8px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.mode-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.mode-btn.active[data-mode="routine"]{color:var(--am);}
+.mode-btn.active[data-mode="training"]{color:var(--run);}
+.mode-btn.active[data-mode="ernaehrung"]{color:#34d399;}
+
+.progress-mini{display:flex;align-items:center;gap:8px;margin-left:14px;}
+.progress-ring-wrap{position:relative;width:34px;height:34px;flex-shrink:0;}
+.progress-ring{transform:rotate(-90deg);width:34px;height:34px;}
+.progress-ring-bg{fill:none;stroke:var(--faint);stroke-width:3;}
+.progress-ring-fill{fill:none;stroke:url(#ringGrad);stroke-width:3;stroke-linecap:round;stroke-dasharray:88;stroke-dashoffset:88;transition:stroke-dashoffset .6s ease;}
+.progress-ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif;}
+.reset-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Instrument Sans',sans-serif;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.reset-btn:hover{color:var(--text);border-color:var(--muted);}
+
+/* TAB NAV */
+.tab-nav{position:sticky;top:58px;z-index:99;background:rgba(10,10,15,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.tab-nav::-webkit-scrollbar{display:none;}
+.tab-nav-inner{max-width:960px;margin:0 auto;display:flex;padding:0 14px;gap:2px;}
+.tab-btn{display:flex;align-items:center;gap:7px;padding:13px 15px;font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .2s;white-space:nowrap;margin-bottom:-1px;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn[data-tab="am"].active{color:var(--am);border-bottom-color:var(--am);}
+.tab-btn[data-tab="pre"].active{color:var(--pre);border-bottom-color:var(--pre);}
+.tab-btn[data-tab="post"].active{color:var(--post);border-bottom-color:var(--post);}
+.tab-btn[data-tab="pm"].active{color:var(--pm);border-bottom-color:var(--pm);}
+.tab-btn[data-tab="week"].active,.tab-btn[data-tab="upper"].active{color:var(--upper);border-bottom-color:var(--upper);}
+.tab-btn[data-tab="legs"].active{color:var(--legs);border-bottom-color:var(--legs);}
+.tab-btn[data-tab="run"].active{color:var(--run);border-bottom-color:var(--run);}
+.tab-btn[data-tab="prog"].active{color:var(--prog);border-bottom-color:var(--prog);}
+.tab-btn[data-tab="phil"].active,.tab-btn[data-tab="timing"].active,.tab-btn[data-tab="tag"].active,.tab-btn[data-tab="food"].active{color:#34d399;border-bottom-color:#34d399;}
+.tab-badge{font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:var(--faint);color:var(--muted);transition:all .2s;font-family:'Syne',sans-serif;}
+.tab-btn.active .tab-badge{color:var(--text);}
+.tab-btn[data-tab="am"].active .tab-badge{background:var(--am-bg);color:var(--am);}
+.tab-btn[data-tab="pre"].active .tab-badge{background:var(--pre-bg);color:var(--pre);}
+.tab-btn[data-tab="post"].active .tab-badge{background:var(--post-bg);color:var(--post);}
+.tab-btn[data-tab="pm"].active .tab-badge{background:var(--pm-bg);color:var(--pm);}
+
+/* nav groups */
+.nav-group{display:none;}
+.nav-group.active{display:flex;}
+
+/* MAIN */
+.main{max-width:960px;margin:0 auto;padding:28px 16px 88px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.mode-section{display:none;}
+.mode-section.active{display:block;}
+
+/* SECTION HEADING */
+.section-heading{margin-bottom:20px;}
+.section-heading h2{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.03em;}
+.section-heading p{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.6;}
+.section-heading .duration{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
+#panel-am .section-heading h2{color:var(--am);} #panel-pre .section-heading h2{color:var(--pre);}
+#panel-post .section-heading h2{color:var(--post);} #panel-pm .section-heading h2{color:var(--pm);}
+#panel-week .section-heading h2,#panel-upper .section-heading h2{color:var(--upper);}
+#panel-legs .section-heading h2{color:var(--legs);} #panel-run .section-heading h2{color:var(--run);}
+#panel-prog .section-heading h2{color:var(--prog);}
+#panel-phil .section-heading h2,#panel-timing .section-heading h2,#panel-tag .section-heading h2,#panel-food .section-heading h2{color:#34d399;}
+
+/* PHASE CARD (routine) */
+.phase-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;transition:border-color .2s;}
+.phase-card:hover{border-color:var(--border-light);}
+.phase-card-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;}
+.phase-icon{font-size:18px;line-height:1;flex-shrink:0;}
+.phase-title-wrap{flex:1;min-width:0;}
+.phase-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.phase-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.phase-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.phase-prog{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--muted);}
+.phase-prog.complete{color:var(--pre);}
+.phase-chevron{width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10px;transition:transform .2s;flex-shrink:0;}
+.phase-card.open .phase-chevron{transform:rotate(180deg);}
+.phase-body{display:none;border-top:1px solid var(--border);}
+.phase-card.open .phase-body{display:block;}
+
+/* CHECK ITEM */
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background .15s;}
+.check-item:last-child{border-bottom:none;}
+.check-item:hover{background:var(--faint);}
+.check-box{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .2s;font-size:10px;color:transparent;}
+.check-item.done .check-box{color:#fff;border-color:transparent;}
+#panel-am .check-item.done .check-box{background:var(--am);}
+#panel-pre .check-item.done .check-box{background:var(--pre);}
+#panel-post .check-item.done .check-box{background:var(--post);}
+#panel-pm .check-item.done .check-box{background:var(--pm);}
+.check-content{flex:1;min-width:0;}
+.check-name{font-size:14px;font-weight:500;line-height:1.35;}
+.check-item.done .check-name{text-decoration:line-through;color:var(--muted);}
+.check-detail{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.55;}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.tag{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:6px;font-family:'Syne',sans-serif;}
+.t-suppl{background:rgba(250,204,21,.1);color:#facc15;}
+.t-aktiv{background:rgba(249,115,22,.1);color:var(--am);}
+.t-passiv{background:rgba(249,115,22,.06);color:#fb923c;}
+.t-kalt{background:rgba(6,182,212,.1);color:var(--post);}
+.t-warm{background:rgba(239,68,68,.1);color:#f87171;}
+.t-mind{background:rgba(129,140,248,.1);color:var(--pm);}
+.t-habit{background:rgba(107,114,128,.12);color:#9ca3af;}
+.t-body{background:rgba(34,197,94,.1);color:var(--pre);}
+.t-neu{background:rgba(192,132,252,.12);color:#c084fc;}
+.t-warn{background:rgba(239,68,68,.1);color:#f87171;}
+
+/* NOTE */
+.note{border-radius:0 8px 8px 0;padding:11px 14px;font-size:12.5px;line-height:1.6;color:var(--muted);margin:12px 0;}
+.note strong{color:var(--text);}
+.note-am{background:var(--am-bg);border-left:3px solid var(--am);}
+.note-pre{background:var(--pre-bg);border-left:3px solid var(--pre);}
+.note-post{background:var(--post-bg);border-left:3px solid var(--post);}
+.note-pm{background:var(--pm-bg);border-left:3px solid var(--pm);}
+.note-upper{background:var(--upper-bg);border-left:3px solid var(--upper);}
+.note-legs{background:var(--legs-bg);border-left:3px solid var(--legs);}
+.note-run{background:var(--run-bg);border-left:3px solid var(--run);}
+.note-prog{background:rgba(167,139,250,.08);border-left:3px solid var(--prog);}
+
+/* REGEN TABLE */
+.regen-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px;}
+.regen-table th{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:600;}
+.regen-table td{padding:8px 10px;border-bottom:1px solid var(--border-light);vertical-align:top;line-height:1.5;}
+.regen-table tr:last-child td{border-bottom:none;}
+.regen-table td:first-child{font-weight:600;white-space:nowrap;color:var(--post);}
+
+/* TRAINING: week grid */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:28px;}
+@media (max-width:640px){.week-grid{grid-template-columns:repeat(4,1fr);}}
+.day-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 10px;text-align:center;transition:border-color .2s,transform .15s;}
+.day-card:hover{transform:translateY(-2px);}
+.day-card.upper{border-top:3px solid var(--upper);} .day-card.legs{border-top:3px solid var(--legs);}
+.day-card.run{border-top:3px solid var(--run);} .day-card.rest{border-top:3px solid var(--faint);}
+.day-name{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.day-type{font-size:20px;margin:6px 0 4px;}
+.day-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;}
+.day-card.upper .day-label{color:var(--upper);} .day-card.legs .day-label{color:var(--legs);}
+.day-card.run .day-label{color:var(--run);} .day-card.rest .day-label{color:var(--muted);}
+.day-detail{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4;}
+.flex-note{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:20px;}
+.flex-note h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text);}
+.flex-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.flex-table td{padding:6px 8px;border-bottom:1px solid var(--border-light);vertical-align:top;line-height:1.5;}
+.flex-table tr:last-child td{border-bottom:none;}
+.flex-table td:first-child{font-family:'Syne',sans-serif;font-weight:700;color:var(--upper);white-space:nowrap;width:80px;}
+
+/* TRAINING cards */
+.training-grid{display:grid;gap:10px;}
+@media (min-width:700px){.training-grid{grid-template-columns:1fr 1fr;}}
+.training-grid .full{grid-column:1 / -1;}
+.t-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.t-card-header{padding:14px 16px;border-bottom:1px solid var(--border);}
+.t-card-header h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.01em;}
+.t-card-header p{font-size:12px;color:var(--muted);margin-top:3px;}
+.t-card.upper .t-card-header h3{color:var(--upper);} .t-card.legs .t-card-header h3{color:var(--legs);}
+.t-card.run .t-card-header h3{color:var(--run);} .t-card.prog .t-card-header h3{color:var(--prog);}
+.ex-row{display:grid;grid-template-columns:1fr auto;align-items:start;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border-light);}
+.ex-row:last-child{border-bottom:none;}
+.ex-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--muted);margin-right:8px;}
+.ex-name{font-size:14px;font-weight:600;}
+.ex-detail{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.ex-badge{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap;align-self:start;margin-top:2px;}
+.badge-upper{background:var(--upper-bg);color:var(--upper);} .badge-legs{background:var(--legs-bg);color:var(--legs);}
+.badge-run{background:var(--run-bg);color:var(--run);} .badge-neu{background:rgba(167,139,250,.12);color:var(--prog);}
+.badge-warn{background:rgba(239,68,68,.1);color:#f87171;}
+
+/* RUN PROTOCOL */
+.run-week{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+.run-week-header{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
+.run-week-header h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--run);flex:1;}
+.run-week-header .wk-badge{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--run-bg);color:var(--run);}
+.run-week-header .chevron{font-size:10px;color:var(--muted);transition:transform .2s;}
+.run-week.open .chevron{transform:rotate(180deg);}
+.run-week-body{display:none;}
+.run-week.open .run-week-body{display:block;}
+.run-session{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border-light);}
+.run-session:last-child{border-bottom:none;}
+.run-day-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;padding-top:2px;}
+.run-desc{font-size:13px;font-weight:500;}
+.run-sub{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.run-vol{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--run);white-space:nowrap;padding-top:2px;}
+
+/* PROG TABLE */
+.prog-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.prog-table th{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.prog-table td{padding:8px 10px;border-bottom:1px solid var(--border-light);vertical-align:top;line-height:1.5;}
+.prog-table tr:last-child td{border-bottom:none;}
+.prog-table td:first-child{font-weight:600;color:var(--upper);font-family:'Syne',sans-serif;}
+
+/* MOBILE BOTTOM NAV */
+@media (max-width:640px){
+  .tab-nav{display:none;}
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,15,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);}
+  .bottom-nav-group{display:none;}
+  .bottom-nav-group.active{display:flex;}
+  .bottom-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px 7px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:'Instrument Sans',sans-serif;font-size:9px;transition:color .2s;position:relative;}
+  .nav-dot{width:4px;height:4px;border-radius:50%;background:currentColor;position:absolute;top:5px;opacity:0;transition:opacity .2s;}
+  .bottom-nav-btn.active .nav-dot{opacity:1;}
+  .nav-icon{font-size:17px;line-height:1;}
+  .bottom-nav-btn[data-tab="am"].active{color:var(--am);}
+  .bottom-nav-btn[data-tab="pre"].active{color:var(--pre);}
+  .bottom-nav-btn[data-tab="post"].active{color:var(--post);}
+  .bottom-nav-btn[data-tab="pm"].active{color:var(--pm);}
+  .bottom-nav-btn[data-tab="week"].active,.bottom-nav-btn[data-tab="upper"].active{color:var(--upper);}
+  .bottom-nav-btn[data-tab="legs"].active{color:var(--legs);}
+  .bottom-nav-btn[data-tab="run"].active{color:var(--run);}
+  .bottom-nav-btn[data-tab="prog"].active{color:var(--prog);}
+  /* mobile mode switch becomes full-width row */
+  .header-inner{flex-wrap:wrap;height:auto;padding:10px 0;gap:10px;}
+  .mode-switch{margin-left:auto;}
+  .progress-mini{margin-left:0;}
+}
+@media (min-width:641px){.bottom-nav{display:none;}}
+@media (max-width:500px){
+  .logo{font-size:15px;}
+  .main{padding:20px 12px 80px;}
+  .section-heading h2{font-size:22px;}
+  .mode-btn{padding:6px 12px;font-size:11px;}
+}
+
+.toggle-dot {
+  width: 28px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--faint);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.toggle-dot::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+  top: 2px;
+  left: 2px;
+  transition: transform .2s, background .2s;
+}
+.toggle-dot.on { background: rgba(6,182,212,.2); border-color: var(--post); }
+.toggle-dot.on::after { transform: translateX(12px); background: var(--post); }
+
+@media (max-width: 500px) {
+  .water-training-toggle span:last-child { display: none; }
+  .water-bar { top: 105px; }
+}
+
+
+
+@media (max-width: 500px) {
+  .water-bar { top: 104px; }
+  .water-amount { font-size: 16px; }
+  .water-add-btn { padding: 8px 14px; font-size: 12px; }
+  .toggle-label { display: none; }
+}
+
+
+/* ── WATER TRACKER ── */
+/* toast */
+.water-toast {
+  position: fixed; bottom: 90px; left: 50%;
+  transform: translateX(-50%) translateY(14px);
+  background: rgba(6,182,212,.18); border: 1px solid var(--post);
+  color: var(--post); font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  padding: 9px 20px; border-radius: 30px;
+  backdrop-filter: blur(12px); opacity: 0; pointer-events: none;
+  transition: opacity .3s, transform .3s; z-index: 999; white-space: nowrap;
+}
+.water-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* bottom sheet overlay */
+.water-sheet-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  align-items: flex-end; justify-content: center;
+}
+.water-sheet-overlay.open { display: flex; }
+
+.water-sheet {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  width: 100%; max-width: 480px;
+  padding: 20px 24px 36px;
+  animation: slideUp .28s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.water-sheet-handle {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--border); margin: 0 auto 18px;
+}
+.water-sheet-title {
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--post);
+  text-align: center; margin-bottom: 6px;
+}
+
+/* ring + amount */
+.water-ring-center {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 24px;
+}
+.water-ring-wrap { position: relative; width: 120px; height: 120px; }
+.water-ring-svg { transform: rotate(-90deg); width: 120px; height: 120px; }
+.water-ring-bg   { fill: none; stroke: var(--faint); stroke-width: 6; }
+.water-ring-fill {
+  fill: none; stroke: var(--post); stroke-width: 6; stroke-linecap: round;
+  stroke-dasharray: 330; stroke-dashoffset: 330;
+  transition: stroke-dashoffset .5s cubic-bezier(.4,0,.2,1);
+}
+.water-ring-inner {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.water-ring-ml {
+  font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
+  color: var(--text); letter-spacing: -.03em; line-height: 1;
+}
+.water-ring-goal {
+  font-size: 11px; color: var(--muted); font-family: 'Syne', sans-serif;
+  font-weight: 600; margin-top: 2px;
+}
+.water-ring-pct {
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+  color: var(--post); margin-top: 6px;
+}
+
+/* buttons row */
+.water-btns {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+}
+.water-add-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(6,182,212,.15); border: 2px solid var(--post);
+  color: var(--post); font-family: 'Syne', sans-serif;
+  font-size: 16px; font-weight: 800;
+  padding: 14px 32px; border-radius: 16px;
+  cursor: pointer; transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: -.01em;
+}
+.water-add-btn:active { transform: scale(.95); background: rgba(6,182,212,.28); }
+.water-sub-btn {
+  background: var(--faint); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700;
+  width: 48px; height: 48px; border-radius: 12px;
+  cursor: pointer; transition: all .15s; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.water-sub-btn:active { background: var(--border); color: var(--text); }
+
+/* training toggle row */
+.water-toggle-row {
+  display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px;
+}
+.toggle-pill {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: var(--faint); border: 1px solid var(--border);
+  position: relative; transition: background .2s; cursor: pointer;
+  flex-shrink: 0;
+}
+.toggle-pill::after {
+  content: ''; position: absolute; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--muted); top: 2px; left: 2px;
+  transition: transform .2s, background .2s;
+}
+.toggle-pill.on { background: rgba(6,182,212,.2); border-color: var(--post); }
+.toggle-pill.on::after { transform: translateX(20px); background: var(--post); }
+.toggle-text {
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600; color: var(--muted);
+  cursor: pointer;
+}
+.toggle-text.on { color: var(--post); }
+
+/* desktop water bar (≥641px) */
+@media (min-width: 641px) {
+  .water-bar-desktop {
+    position: sticky; top: 108px; z-index: 98;
+    background: rgba(10,10,15,.95); backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+  .water-bar-inner {
+    max-width: 960px; margin: 0 auto;
+    display: flex; align-items: center; gap: 16px; height: 52px;
+  }
+  .wbar-label {
+    font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase; color: var(--post);
+  }
+  .wbar-track {
+    flex: 1; height: 6px; background: var(--faint); border-radius: 3px; overflow: hidden;
+  }
+  .wbar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--post), #06d6c8);
+    border-radius: 3px; transition: width .4s ease; width: 0%;
+  }
+  .wbar-amount {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; color: var(--text);
+  }
+  .wbar-add {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(6,182,212,.12); border: 1.5px solid var(--post);
+    color: var(--post); font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 800;
+    padding: 7px 16px; border-radius: 10px; cursor: pointer; transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wbar-add:active { background: rgba(6,182,212,.22); }
+  .wbar-sub {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-size: 14px; font-weight: 700; width: 28px; height: 28px;
+    border-radius: 7px; cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .wbar-toggle-wrap {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+  }
+  .wbar-toggle-pill {
+    width: 32px; height: 18px; border-radius: 9px;
+    background: var(--faint); border: 1px solid var(--border);
+    position: relative; transition: background .2s; flex-shrink: 0;
+  }
+  .wbar-toggle-pill::after {
+    content: ''; position: absolute; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--muted); top: 2px; left: 2px;
+    transition: transform .2s, background .2s;
+  }
+  .wbar-toggle-pill.on { background: rgba(6,182,212,.2); border-color: var(--post); }
+  .wbar-toggle-pill.on::after { transform: translateX(14px); background: var(--post); }
+  .wbar-toggle-label { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .wbar-toggle-label.on { color: var(--post); }
+}
+@media (max-width: 640px) {
+  .water-bar-desktop { display: none !important; }
+  .water-toast { bottom: 86px; }
+}
+
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="50%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="logo">ANDY'S SYSTEM</div>
+    <div class="mode-switch">
+      <button class="mode-btn active" data-mode="routine" onclick="switchMode('routine')">Routine</button>
+      <button class="mode-btn" data-mode="training" onclick="switchMode('training')">Training</button>
+      <button class="mode-btn" data-mode="ernaehrung" onclick="switchMode('ernaehrung')">Ernährung</button>
+    </div>
+    <div class="progress-mini" id="progressMini">
+      <div class="progress-ring-wrap">
+        <svg class="progress-ring" viewBox="0 0 36 36">
+          <circle class="progress-ring-bg" cx="18" cy="18" r="14"/>
+          <circle class="progress-ring-fill" id="ringFill" cx="18" cy="18" r="14"/>
+        </svg>
+        <div class="progress-ring-pct" id="ringPct">0%</div>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">↺ Reset</button>
+    </div>
+  </div>
+</header>
+
+<!-- TAB NAV: two groups -->
+<nav class="tab-nav">
+  <div class="tab-nav-inner nav-group active" id="nav-routine">
+
+    <button class="tab-btn active" data-tab="am" onclick="switchTab('am')">
+      🌅 Morgen <span class="tab-badge" id="badge-am">0/0</span>
+    </button>
+    <button class="tab-btn" data-tab="pre" onclick="switchTab('pre')">
+      ⚡ Pre-Training <span class="tab-badge" id="badge-pre">0/0</span>
+    </button>
+    <button class="tab-btn" data-tab="post" onclick="switchTab('post')">
+      🔄 Post-Training <span class="tab-badge" id="badge-post">0/0</span>
+    </button>
+    <button class="tab-btn" data-tab="pm" onclick="switchTab('pm')">
+      🌙 Abend <span class="tab-badge" id="badge-pm">0/0</span>
+    </button>
+  
+  </div>
+  <div class="tab-nav-inner nav-group" id="nav-ernaehrung">
+    <button class="tab-btn active" data-tab="phil"   onclick="switchTab('phil')">🌱 Philosophie</button>
+    <button class="tab-btn"        data-tab="timing" onclick="switchTab('timing')">⏱ Timing</button>
+    <button class="tab-btn"        data-tab="tag"    onclick="switchTab('tag')">📅 Beispieltag</button>
+    <button class="tab-btn"        data-tab="food"   onclick="switchTab('food')">🛒 Lebensmittel</button>
+  </div>
+  <div class="tab-nav-inner nav-group" id="nav-training">
+
+    <button class="tab-btn active" data-tab="week"  onclick="switchTab('week')">📅 Wochenplan</button>
+    <button class="tab-btn"        data-tab="upper" onclick="switchTab('upper')">💪 Oberkörper</button>
+    <button class="tab-btn"        data-tab="legs"  onclick="switchTab('legs')">🦵 Beine</button>
+    <button class="tab-btn"        data-tab="run"   onclick="switchTab('run')">🏃 Laufaufbau</button>
+    <button class="tab-btn"        data-tab="prog"  onclick="switchTab('prog')">📈 Progression</button>
+  
+  </div>
+</nav>
+
+
+
+
+
+<!-- DESKTOP WATER BAR -->
+<div class="water-bar-desktop" id="waterBarDesktop">
+  <div class="water-bar-inner">
+    <span class="wbar-label">💧 Wasser</span>
+    <div class="wbar-track"><div class="wbar-fill" id="wbarFill"></div></div>
+    <span class="wbar-amount" id="wbarAmount">0 ml</span>
+    <button class="wbar-sub" onclick="waterSub()" title="-250 ml">−</button>
+    <button class="wbar-add" onclick="waterAdd()">🥛 +250 ml</button>
+    <div class="wbar-toggle-wrap" onclick="toggleTrainingDay()">
+      <div class="wbar-toggle-pill" id="wbarToggle"></div>
+      <span class="wbar-toggle-label" id="wbarLabel">Training</span>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE WATER SHEET -->
+<div class="water-sheet-overlay" id="waterSheet" onclick="closeWaterSheet(event)">
+  <div class="water-sheet">
+    <div class="water-sheet-handle"></div>
+    <div class="water-sheet-title">💧 Wasser-Tracker</div>
+    <div class="water-ring-center">
+      <div class="water-ring-wrap">
+        <svg class="water-ring-svg" viewBox="0 0 120 120">
+          <circle class="water-ring-bg"   cx="60" cy="60" r="52.5"/>
+          <circle class="water-ring-fill" id="waterRingFill" cx="60" cy="60" r="52.5"/>
+        </svg>
+        <div class="water-ring-inner">
+          <div class="water-ring-ml"  id="waterRingMl">0 ml</div>
+          <div class="water-ring-goal" id="waterRingGoal">/ 3,0 L</div>
+        </div>
+      </div>
+      <div class="water-ring-pct" id="waterRingPct">0% vom Tagesziel</div>
+    </div>
+    <div class="water-btns">
+      <button class="water-sub-btn" onclick="waterSub()">−</button>
+      <button class="water-add-btn" onclick="waterAdd()">🥛 +250 ml</button>
+    </div>
+    <div class="water-toggle-row" onclick="toggleTrainingDay()">
+      <div class="toggle-pill" id="sheetToggle"></div>
+      <span class="toggle-text" id="sheetToggleLabel">Normaltag (3,0 L)</span>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="water-toast" id="waterToast">💧 Zeit für ein Glas Wasser!</div>
+
+<main class="main">
+  <div class="mode-section active" id="mode-routine">
+
+
+  <!-- ══ MORGEN ══ -->
+  <section id="panel-am" class="tab-panel active">
+    <div class="section-heading">
+      <h2>Morgenritual</h2>
+      <span class="duration">~55 min</span>
+    </div>
+
+    <div class="phase-grid">
+
+      <!-- Aufwachen -->
+      <div class="phase-card open" data-phase="am-1">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">☀️</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Aufwachen & Sonnenlicht</div>
+            <div class="phase-sub">5 min · Zirkadian Reset</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-am-1">0/4</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="am-1-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Mouth Tape entfernen & Atemkontrolle</div>
+              <div class="check-detail">Wie war die Nasenatmung? Bewusst durch die Nase ein- und ausatmen</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-habit">Habit</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-1-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">5–10 min Morgensonne</div>
+              <div class="check-detail">Direkt ans Fenster oder raus — keine Brille, kein Fenster. Melatonin-Rhythmus setzen</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-habit">Zirkadian</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-1-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">500 ml Wasser + ausgepresste Zitrone + 1–2 TL Apfelessig</div>
+              <div class="check-detail">Zimmertemperatur · Zitrone: Vitamin C, Verdauungsaktivierung · Apfelessig (1–2 TL): verlangsamt Magenentleerung, stabilisiert Blutzucker, verbessert Insulinsensitivität · immer verdünnt — nie pur, schützt Zahnschmelz</div>
+              <div class="tags"><span class="tag t-habit">Hydration</span><span class="tag t-suppl">Vit C</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-1-4">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Schwarzkümmelöl — 1 TL nüchtern</div>
+              <div class="check-detail">Thymochinon: antiinflammatorisch, Atemwege (post-Rauchen), immunmodulierend. Nicht erhitzen. 15–20 min vor anderen Supplements</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-suppl">Supplement</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supplements -->
+      <div class="phase-card open" data-phase="am-2">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">💊</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Morgen-Supplements</div>
+            <div class="phase-sub">2 min · nach erstem Essen</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-am-2">0/3</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="am-2-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Vitamin D3 (2000–4000 IE) + K2</div>
+              <div class="check-detail">Fettlöslich — mit erstem Essen einnehmen</div>
+              <div class="tags"><span class="tag t-suppl">Supplement</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-2-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Vitamin C — 500 mg</div>
+              <div class="check-detail">Co-Faktor Kollagensynthese, Gefäßschutz post-Rauchen, oxidativer Stress</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-suppl">Supplement</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-2-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Omega-3 (2–3 g) + Creatin (3–5 g)</div>
+              <div class="check-detail">Omega-3 zum Essen · Creatin flexibel, hier als tägliche Gewohnheit</div>
+              <div class="tags"><span class="tag t-suppl">Supplement</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kaltdusche -->
+      <div class="phase-card open" data-phase="am-3">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🧊</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Kaltdusche</div>
+            <div class="phase-sub">5–8 min · Nervensystem</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-am-3">0/3</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="am-3-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Warm starten — 2–3 min</div>
+              <div class="check-detail">Durchblutung ankurbeln, Faszien locker machen</div>
+              <div class="tags"><span class="tag t-warm">Warm</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-3-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Kalt ausenden — 2–3 min unter 15°C</div>
+              <div class="check-detail">Noradrenalin +300%, Dopamin, Wachheit ohne Koffein. Durch die Nase atmen — nicht kämpfen</div>
+              <div class="tags"><span class="tag t-kalt">Kalt</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-3-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">30–60 sek nicht abtrocknen</div>
+              <div class="check-detail">Körper erzeugt Eigenwärme — das ist der eigentliche Trainingseffekt</div>
+              <div class="tags"><span class="tag t-kalt">Kalt</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gelenkmob -->
+      <div class="phase-card open" data-phase="am-4">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🔄</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Aktive Gelenkmobilisation</div>
+            <div class="phase-sub">8 min · Ober- & Unterkörper</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-am-4">0/3</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="am-4-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Oberkörper-Kette</div>
+              <div class="check-detail">Hals × 8 → Schulter-Kreise × 10 → Handgelenk × 10 → Ellenbogen-Rotation × 8</div>
+              <div class="tags"><span class="tag t-aktiv">Aktiv</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-4-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Wirbelsäule & Rumpf</div>
+              <div class="check-detail">Cat-Cow × 10 → Quadruped Thoracic Rotation × 8/Seite → Bird-Dog × 6/Seite → Dead Bug × 8</div>
+              <div class="tags"><span class="tag t-aktiv">Aktiv</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-4-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Unterkörper-Kette</div>
+              <div class="check-detail">Hüft-Kreise × 10/Seite → Knie-Kreise × 8 → Sprunggelenk-Alphabet (A–Z) → Glute Bridge × 10</div>
+              <div class="tags"><span class="tag t-aktiv">Aktiv</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bodenarbeit -->
+      <div class="phase-card open" data-phase="am-5">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🦵</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Bodenarbeit & Hüftöffnung</div>
+            <div class="phase-sub">10 min · Rotation & Tiefe</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-am-5">0/3</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="am-5-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">90/90 Hip Switch + Hip Airplanes</div>
+              <div class="check-detail">Switch × 8 → Hold 60 sek/Seite → Airplanes × 6/Seite</div>
+              <div class="tags"><span class="tag t-aktiv">Aktiv</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-5-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Couch Stretch + Butterfly</div>
+              <div class="check-detail">Couch Stretch 90 sek/Seite → Butterfly 2 min</div>
+              <div class="tags"><span class="tag t-passiv">Passiv</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-5-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Weltrekordkniebeuge + Deep Squat Hold</div>
+              <div class="check-detail">× 5/Seite → Lunge mit Rotation × 6 → Deep Squat Hold 90 sek</div>
+              <div class="tags"><span class="tag t-aktiv">Integration</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Passives Dehnen -->
+      <div class="phase-card open" data-phase="am-6">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🧘</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Passives Dehnen</div>
+            <div class="phase-sub">12 min · Oberkörper & hintere Kette</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-am-6">0/4</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="am-6-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">BWS — Foam Roller Extension</div>
+              <div class="check-detail">2 min thorakal T4–T12, Segment für Segment</div>
+              <div class="tags"><span class="tag t-passiv">Passiv</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-6-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Doorway Stretch — Pectoralis</div>
+              <div class="check-detail">60–90 sek/Seite — Ellenbogen 90°, leichter Vorwärtsdruck</div>
+              <div class="tags"><span class="tag t-passiv">Passiv</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-6-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Hamstrings liegend mit Band</div>
+              <div class="check-detail">90 sek/Seite — Knie minimal gebeugt, Fuß in Dorsalextension</div>
+              <div class="tags"><span class="tag t-passiv">Passiv</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-6-4">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Waden & Achillessehne</div>
+              <div class="check-detail">Gastrocnemius 60 sek/Seite (Knie gestreckt) + Soleus 45 sek/Seite (Knie gebeugt)</div>
+              <div class="tags"><span class="tag t-passiv">Passiv</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mindset - full width -->
+      <div class="phase-card open phase-grid-full" data-phase="am-7">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🧠</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Mindset & Ausrichtung</div>
+            <div class="phase-sub">5 min · Fokus für den Tag</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-am-7">0/2</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="am-7-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Tagesziel setzen</div>
+              <div class="check-detail">Eine konkrete Sache — aufschreiben macht es verbindlicher</div>
+              <div class="tags"><span class="tag t-mind">Mindset</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="am-7-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Boxatmung — 3 Minuten</div>
+              <div class="check-detail">4 sek ein → 4 halten → 4 aus → 4 halten. Nervensystem kalibrieren, Fokus schärfen</div>
+              <div class="tags"><span class="tag t-mind">Mindset</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /phase-grid -->
+
+    <div class="note note-am"><strong>Reihenfolge-Logik:</strong> Sonnenlicht & Schwarzkümmel nüchtern → Kaltdusche aktiviert Noradrenalin → aktive Mobilisation nutzt den Wachheitspeak → passives Dehnen wenn der Körper durchblutet und warm ist.</div>
+  </section>
+
+  <!-- ══ PRE-TRAINING ══ -->
+  <section id="panel-pre" class="tab-panel">
+    <div class="section-heading">
+      <h2>Pre-Training</h2>
+      <span class="duration">30–120 min vorher</span>
+    </div>
+
+    <div class="phase-card open" data-phase="pre-1">
+      <div class="phase-card-header" onclick="togglePhase(this)">
+        <span class="phase-icon">🥩</span>
+        <div class="phase-title-wrap">
+          <div class="phase-title">Kollagen + Vitamin C</div>
+          <div class="phase-sub">30–45 min vor Training · jeden Tag</div>
+        </div>
+        <div class="phase-meta">
+          <span class="phase-prog" id="prog-pre-1">0/2</span>
+          <span class="phase-chevron">▾</span>
+        </div>
+      </div>
+      <div class="phase-body">
+        <div class="check-item" onclick="toggle(this)" data-id="pre-1-1">
+          <div class="check-box">✓</div>
+          <div class="check-content">
+            <div class="check-name">Kollagen-Peptide — 15 g + Vitamin C 200 mg</div>
+            <div class="check-detail">30–45 min vor dem Training — erhöht Kollagensynthese in Sehnen & Bändern messbar. Vit. C ist Pflicht-Cofaktor. Mit Wasser lösen, nicht mit großer Mahlzeit</div>
+            <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-suppl">Kollagen</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)" data-id="pre-1-2">
+          <div class="check-box">✓</div>
+          <div class="check-content">
+            <div class="check-name">Elektrolyte + 400 ml Wasser</div>
+            <div class="check-detail">Vor dem Training hydriert sein — mit Prise Meersalz oder Elektrolyt-Drink</div>
+            <div class="tags"><span class="tag t-habit">Hydration</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-card open" data-phase="pre-2">
+      <div class="phase-card-header" onclick="togglePhase(this)">
+        <span class="phase-icon">🥤</span>
+        <div class="phase-title-wrap">
+          <div class="phase-title">Rote Beete Saft</div>
+          <div class="phase-sub">2–3 h vor Ausdauertraining · Lauftag</div>
+        </div>
+        <div class="phase-meta">
+          <span class="phase-prog" id="prog-pre-2">0/2</span>
+          <span class="phase-chevron">▾</span>
+        </div>
+      </div>
+      <div class="phase-body">
+        <div class="check-item" onclick="toggle(this)" data-id="pre-2-1">
+          <div class="check-box">✓</div>
+          <div class="check-content">
+            <div class="check-name">200–300 ml Rote Beete Saft trinken</div>
+            <div class="check-detail">Nitrat → Stickoxid → bessere Durchblutung, niedrigerer O₂-Verbrauch bei gleicher Leistung. Konzentriert (70 ml) geht auch. Timing: 2–3 h vorher = Nitrat-Peak im Blut beim Training</div>
+            <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-kalt">Ausdauer</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)" data-id="pre-2-2">
+          <div class="check-box">✓</div>
+          <div class="check-content">
+            <div class="check-name">⚠️ Danach keine Mundspülung</div>
+            <div class="check-detail">Mundspülung tötet die oralen Bakterien die Nitrat zu NO umwandeln — das eliminiert den gesamten Leistungseffekt</div>
+            <div class="tags"><span class="tag t-warn">Achtung</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-card open" data-phase="pre-3">
+      <div class="phase-card-header" onclick="togglePhase(this)">
+        <span class="phase-icon">😷</span>
+        <div class="phase-title-wrap">
+          <div class="phase-title">Nasenpflaster beim Laufen</div>
+          <div class="phase-sub">Zone 2 & Grundlagenläufe · Lauftag</div>
+        </div>
+        <div class="phase-meta">
+          <span class="phase-prog" id="prog-pre-3">0/2</span>
+          <span class="phase-chevron">▾</span>
+        </div>
+      </div>
+      <div class="phase-body">
+        <div class="check-item" onclick="toggle(this)" data-id="pre-3-1">
+          <div class="check-box">✓</div>
+          <div class="check-content">
+            <div class="check-name">Nasenpflaster aufkleben vor dem Lauf</div>
+            <div class="check-detail">Erzwingt Nasenatmung: trainiert CO₂-Toleranz & Bohr-Effekt (bessere O₂-Abgabe ans Gewebe). Wenn du durch den Mund atmen musst — Tempo runterschrauben statt Pflaster abnehmen</div>
+            <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-kalt">Lauftag</span></div>
+          </div>
+        </div>
+        <div class="check-item" onclick="toggle(this)" data-id="pre-3-2">
+          <div class="check-box">✓</div>
+          <div class="check-content">
+            <div class="check-name">Bei Intervallen oder sehr hoher Intensität: weglassen</div>
+            <div class="check-detail">Maximale Sauerstoffaufnahme braucht freie Atemwege. Nasenpflaster nur bei Zone 2 und Grundlagenläufen</div>
+            <div class="tags"><span class="tag t-warn">Hinweis</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note note-pre"><strong>Kollagen täglich, Rote Beete nur Ausdauertag.</strong> Das Kollagen-Fenster 30–45 min vor dem Training gilt auch für Krafttraining — Sehnen und Bänder profitieren unabhängig vom Trainingstyp.</div>
+  </section>
+
+  <!-- ══ POST-TRAINING ══ -->
+  <section id="panel-post" class="tab-panel">
+    <div class="section-heading">
+      <h2>Post-Training</h2>
+      <span class="duration">trainingsabhängig</span>
+    </div>
+
+    <div class="phase-grid">
+
+      <div class="phase-card open" data-phase="post-1">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🧊</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Kälteanwendung</div>
+            <div class="phase-sub">nach Ausdauer · 10–15 min</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-post-1">0/3</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="post-1-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Kalte Dusche / Eisbad nach dem Lauf</div>
+              <div class="check-detail">Unter 15°C, 10–15 min — Entzündungsreduktion, Laktatabbau, DOMS-Vorbeugung. Beine priorisieren</div>
+              <div class="tags"><span class="tag t-kalt">Kalt</span><span class="tag t-kalt">Lauftag</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-1-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Wechseldusche — 1 min kalt / 1 min warm × 3–5</div>
+              <div class="check-detail">Alternative zum Eisbad — Vasomotion-Training, immer kalt enden</div>
+              <div class="tags"><span class="tag t-kalt">Kontrast</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-1-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">⚠️ NICHT direkt nach Krafttraining</div>
+              <div class="check-detail">Kälte nach Gym unterdrückt mTOR-Signaling — kostet Muskelmasse. Min. 4–6 h Abstand</div>
+              <div class="tags"><span class="tag t-warn">Achtung</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card open" data-phase="post-2">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🔥</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Sauna</div>
+            <div class="phase-sub">nach Kraft · 2–3× / Woche</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-post-2">0/4</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="post-2-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">3 Gänge à 12–15 min bei 80–95°C</div>
+              <div class="check-detail">Zwischen den Gängen 10–15 min Abkühlung. GH-Ausschüttung ab 20+ min deutlich</div>
+              <div class="tags"><span class="tag t-warm">Sauna</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-2-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Letzter Gang kalt abschließen</div>
+              <div class="check-detail">Kalt abduschen oder Kaltbecken — Kontrasteffekt maximieren</div>
+              <div class="tags"><span class="tag t-kalt">Kalt</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-2-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">500–750 ml Wasser + Elektrolyte</div>
+              <div class="check-detail">Prise Meersalz — kein Alkohol vor/nach Sauna</div>
+              <div class="tags"><span class="tag t-habit">Hydration</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-2-4">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Frühestens 30 min nach Training</div>
+              <div class="check-detail">Körper braucht kurze Abkühlzeit. Dann: Laktat, Muskelentspannung, Testosteron & GH optimal</div>
+              <div class="tags"><span class="tag t-warm">Timing</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card open" data-phase="post-3">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🛁</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Epsom-Bad</div>
+            <div class="phase-sub">nach hartem Training · optional</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-post-3">0/3</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="post-3-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">400–500 g Epsom-Salz in 38–40°C — 20 min</div>
+              <div class="check-detail">Magnesiumsulfat perkutan — Muskelentspannung, Entzündung. Ideal nach schwerem Bein-Tag</div>
+              <div class="tags"><span class="tag t-body">Muskel</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-3-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Lavendel- oder Eukalyptusöl dazu</div>
+              <div class="check-detail">5–8 Tropfen — Lavendel für Schlaf & Entspannung, Eukalyptus für Atemwege</div>
+              <div class="tags"><span class="tag t-body">Optional</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-3-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Max. 40°C Wassertemperatur</div>
+              <div class="check-detail">Über 40°C steigt der Herzstress — 38–40°C ist der Sweet Spot</div>
+              <div class="tags"><span class="tag t-warm">Temperatur</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card open" data-phase="post-4">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🌿</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Tiger Balm & Magnesiumöl</div>
+            <div class="phase-sub">5–8 min · nach Training</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-post-4">0/4</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="post-4-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Tiger Balm ROT — nach Krafttraining</div>
+              <div class="check-detail">Schultern, Rücken, Beine — Wärme & Durchblutung durch Kampfer & Menthol</div>
+              <div class="tags"><span class="tag t-warm">Wärme</span><span class="tag t-body">Krafttag</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-4-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Tiger Balm WEISS — nach Laufen</div>
+              <div class="check-detail">Wade, Achillessehne, Knie — kühlend, höherer Mentholanteil, Sehnen & Gelenke</div>
+              <div class="tags"><span class="tag t-kalt">Kühl</span><span class="tag t-body">Lauftag</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-4-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Magnesiumöl — Waden & Oberschenkel</div>
+              <div class="check-detail">10–15 Sprühstöße einmassieren, 20 min einwirken — perkutane Aufnahme, Muskelentspannung</div>
+              <div class="tags"><span class="tag t-body">Magnesium</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-4-4">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Körperpflege nach Sauna</div>
+              <div class="check-detail">Lotion oder Kokosöl — Haut ist nach Wärme maximal aufnahmefähig</div>
+              <div class="tags"><span class="tag t-habit">Pflege</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lacrosse full width -->
+      <div class="phase-card open phase-grid-full" data-phase="post-5">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🎾</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Lacrosse-Ball — tiefe Faszienarbeit</div>
+            <div class="phase-sub">8–10 min · abends nach Training</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-post-5">0/4</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="post-5-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Plantarfaszie — 2 min/Fuß</div>
+              <div class="check-detail">Ball unter den Fuß, langsam über die Fußsohle, sensible Punkte 20–30 sek halten. Besonders nach Laufen</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-body">Faszien</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-5-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Piriformis — 2 min/Seite</div>
+              <div class="check-detail">Ball unter Gesäß, Bein kreuzen, Gewicht verlagern — löst Hüftspannung & Ischias-Druck</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-body">Faszien</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-5-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Pectoralis minor — 2 min/Seite</div>
+              <div class="check-detail">Ball zwischen Brust/Schulter & Wand, sanfter Druck, Arm langsam heben/senken. Nach Push-Tag & Sitzen</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-body">Faszien</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="post-5-4">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Subokzipitale (Schädelbasis) — 2 min</div>
+              <div class="check-detail">Ball unter Schädelbasis, minimaler Druck, Kopf leicht rotieren — tief gegen Nackenverspannung, verbessert Schlafqualität</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-body">Faszien</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /phase-grid -->
+
+    <!-- Referenztabelle -->
+    <div class="phase-card open" data-phase="post-ref" style="margin-top:10px;">
+      <div class="phase-card-header" onclick="togglePhase(this)">
+        <span class="phase-icon">📋</span>
+        <div class="phase-title-wrap">
+          <div class="phase-title">Protokoll nach Trainingstyp</div>
+          <div class="phase-sub">Schnellreferenz</div>
+        </div>
+        <div class="phase-meta"><span class="phase-chevron">▾</span></div>
+      </div>
+      <div class="phase-body">
+        <div style="overflow-x:auto;">
+          <table class="regen-table">
+            <thead><tr><th>Tag</th><th>Direkt danach</th><th>Abends</th></tr></thead>
+            <tbody>
+              <tr><td>Kraft</td><td>Sauna 3× · kalt abschließen · Tiger Balm ROT</td><td>Epsom-Bad optional · Magnesiumöl · Lacrosse: Pec + Piriformis</td></tr>
+              <tr><td>Laufen</td><td>Wechseldusche 3–5× · Tiger Balm WEISS</td><td>Kompression · Lacrosse: Plantarfaszie + Piriformis · Legs up Wall</td></tr>
+              <tr><td>Kombi</td><td>Kalt nach Lauf · Sauna nach Kraft (4–6h)</td><td>Epsom-Bad · Magnesiumöl · alle Lacrosse-Zonen</td></tr>
+              <tr><td>Ruhetag</td><td>Spazieren, Mobility — keine intensive Kälte</td><td>Warmes Bad + Lavendel · Foam Rolling sanft · Subokzipitale</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="note note-post"><strong>Kalt-Warm-Logik:</strong> Kälte nach Ausdauer = Entzündung bremsen. Sauna nach Kraft = Wachstumshormone ankurbeln. Kältebad direkt nach dem Gym ist ein häufiger Fehler — das kostet Muskelmasse.</div>
+  </section>
+
+  <!-- ══ ABEND ══ -->
+  <section id="panel-pm" class="tab-panel">
+    <div class="section-heading">
+      <h2>Abendritual</h2>
+      <span class="duration">~25 min</span>
+    </div>
+
+    <div class="phase-grid">
+
+      <div class="phase-card open" data-phase="pm-1">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">🦵</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Körperliche Erholung</div>
+            <div class="phase-sub">8 min · Venöser Rückfluss</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-pm-1">0/2</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="pm-1-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Legs up the Wall — 5 min</div>
+              <div class="check-detail">Beine senkrecht an der Wand, Arme locker. Venöser Rückfluss, Parasympathikus</div>
+              <div class="tags"><span class="tag t-body">Recovery</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="pm-1-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Foam Rolling sanft — 3 min</div>
+              <div class="check-detail">Lauftag: Wade & Plantarfaszie · Krafttag: Lats & oberer Rücken · Immer: thorakale BWS</div>
+              <div class="tags"><span class="tag t-body">Recovery</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card open" data-phase="pm-2">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">💊</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Abend-Supplements</div>
+            <div class="phase-sub">Timing beachten</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-pm-2">0/4</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="pm-2-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Zink Bisglycinat — 15–25 mg</div>
+              <div class="check-detail">Direkt nach dem Abendessen — min. 30 min vor Magnesium (Transporter-Konkurrenz)</div>
+              <div class="tags"><span class="tag t-suppl">Supplement</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="pm-2-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Ashwagandha KSM-66 — 300–600 mg</div>
+              <div class="check-detail">Abends — senkt Cortisol bis 28%, verbessert Tiefschlaf, Testosteron. Besonders post-Rauchen wertvoll</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-suppl">Adaptogen</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="pm-2-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Magnesium Bisglycinat — 300–400 mg</div>
+              <div class="check-detail">45–60 min vor dem Schlafen — Tiefschlaf, Muskelentspannung, Cortisolabbau</div>
+              <div class="tags"><span class="tag t-suppl">Supplement</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="pm-2-4">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Letztes Wasser + Prise Meersalz</div>
+              <div class="check-detail">300 ml — Natrium-Balance über Nacht, Muskelkrämpfe verhindern</div>
+              <div class="tags"><span class="tag t-habit">Hydration</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schlaf full width -->
+      <div class="phase-card open phase-grid-full" data-phase="pm-3">
+        <div class="phase-card-header" onclick="togglePhase(this)">
+          <span class="phase-icon">😴</span>
+          <div class="phase-title-wrap">
+            <div class="phase-title">Schlafvorbereitung & Mouth Taping</div>
+            <div class="phase-sub">10 min · Nervensystem runterregeln</div>
+          </div>
+          <div class="phase-meta">
+            <span class="phase-prog" id="prog-pm-3">0/4</span>
+            <span class="phase-chevron">▾</span>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="check-item" onclick="toggle(this)" data-id="pm-3-1">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Bildschirme weg — min. 30–45 min vorher</div>
+              <div class="check-detail">Blaues Licht supprimiert Melatonin bis zu 3 Stunden</div>
+              <div class="tags"><span class="tag t-habit">Habit</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="pm-3-2">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">Tagesreflexion — 2–3 min</div>
+              <div class="check-detail">Was lief gut? Was anders? Schreiben schließt offene Gedankenschleifen</div>
+              <div class="tags"><span class="tag t-mind">Mindset</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="pm-3-3">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">4-7-8 Atemtechnik — 4–6 Runden</div>
+              <div class="check-detail">4 sek ein → 7 halten → 8 aus. Vagusnerv, senkt Herzrate & Cortisol nachweislich</div>
+              <div class="tags"><span class="tag t-mind">Atmung</span></div>
+            </div>
+          </div>
+          <div class="check-item" onclick="toggle(this)" data-id="pm-3-4">
+            <div class="check-box">✓</div>
+            <div class="check-content">
+              <div class="check-name">😷 Mouth Tape anlegen</div>
+              <div class="check-detail">Myotape, Somnifix oder schmales Micropore-Tape quer über die Lippen. Tiefschlaf, CO₂-Toleranz, Atemwegspflege. Einstieg: kleines Stück quer (nicht vollflächig)</div>
+              <div class="tags"><span class="tag t-neu">Neu</span><span class="tag t-habit">Schlaf</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /phase-grid -->
+
+    <div class="note note-pm"><strong>Abend = nur Erholung & Runterregeln.</strong> Zink 30 min vor Magnesium wegen der Transporter-Konkurrenz. Ashwagandha + Magnesium zusammen — beide wirken auf den Cortisol-Regelkreis und verstärken sich gegenseitig.</div>
+  </section>
+
+
+  </div>
+  <div class="mode-section" id="mode-training">
+
+
+<!-- ══ WOCHENPLAN ══ -->
+<section id="panel-week" class="tab-panel active">
+  <div class="section-heading">
+    <h2>Flexible Wochenstruktur</h2>
+    <p>Da deine Woche flexibel ist, gibt es kein fixes Tagesdatum — sondern eine Reihenfolge die du in deine Woche einpasst. Die einzige Regel: zwischen zwei gleichartigen Einheiten mindestens 48 h Pause.</p>
+  </div>
+
+  <!-- Standard 5-Tage Woche -->
+  <div class="flex-note">
+    <h3>Empfohlene Reihenfolge (5 aktive Tage)</h3>
+    <table class="flex-table">
+      <tr><td>Tag 1</td><td><strong style="color:var(--upper)">Oberkörper A</strong> — Horizontaler Fokus (Drücken + Ziehen)</td></tr>
+      <tr><td>Tag 2</td><td><strong style="color:var(--run)">Laufen</strong> — Zone 2 Grundlage, 20–30 min</td></tr>
+      <tr><td>Tag 3</td><td><strong style="color:var(--legs)">Beine</strong> — Kraft ohne schwere Wirbelsäulenbelastung</td></tr>
+      <tr><td>Tag 4</td><td><strong style="color:var(--upper)">Oberkörper B</strong> — Vertikaler Fokus (Drücken + Ziehen)</td></tr>
+      <tr><td>Tag 5</td><td><strong style="color:var(--run)">Laufen</strong> — längere, ruhige Einheit, 30–40 min</td></tr>
+      <tr><td>Tag 6–7</td><td><strong style="color:var(--muted)">Erholung</strong> — Mobility, Spazieren, Sauna</td></tr>
+    </table>
+  </div>
+
+  <!-- 4-Tage Woche -->
+  <div class="flex-note" style="margin-bottom:20px;">
+    <h3>Kompakte Variante (4 aktive Tage)</h3>
+    <table class="flex-table">
+      <tr><td>Tag 1</td><td><strong style="color:var(--upper)">Oberkörper A</strong></td></tr>
+      <tr><td>Tag 2</td><td><strong style="color:var(--legs)">Beine</strong></td></tr>
+      <tr><td>Tag 3</td><td><strong style="color:var(--upper)">Oberkörper B</strong></td></tr>
+      <tr><td>Tag 4</td><td><strong style="color:var(--run)">Laufen</strong> — 25–35 min</td></tr>
+      <tr><td>Rest</td><td><strong style="color:var(--muted)">Erholung</strong> — 2–3 Tage aktive Pause</td></tr>
+    </table>
+  </div>
+
+  <!-- 7-Tage Visual -->
+  <p style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Beispielwoche visuell</p>
+  <div class="week-grid">
+    <div class="day-card upper"><div class="day-name">Tag 1</div><div class="day-type">💪</div><div class="day-label">OK–A</div><div class="day-detail">Horizontal</div></div>
+    <div class="day-card run">  <div class="day-name">Tag 2</div><div class="day-type">🏃</div><div class="day-label">Laufen</div><div class="day-detail">Zone 2</div></div>
+    <div class="day-card legs"> <div class="day-name">Tag 3</div><div class="day-type">🦵</div><div class="day-label">Beine</div><div class="day-detail">Kraft</div></div>
+    <div class="day-card rest"> <div class="day-name">Tag 4</div><div class="day-type">🧘</div><div class="day-label">Erholung</div><div class="day-detail">Sauna / Mobility</div></div>
+    <div class="day-card upper"><div class="day-name">Tag 5</div><div class="day-type">💪</div><div class="day-label">OK–B</div><div class="day-detail">Vertikal</div></div>
+    <div class="day-card run">  <div class="day-name">Tag 6</div><div class="day-type">🏃</div><div class="day-label">Laufen</div><div class="day-detail">Ausdauer</div></div>
+    <div class="day-card rest"> <div class="day-name">Tag 7</div><div class="day-type">😴</div><div class="day-label">Ruhe</div><div class="day-detail">Komplett</div></div>
+  </div>
+
+  <div class="note note-upper">
+    <strong>Kernregel:</strong> Bein-Tag immer mindestens 48 h vor einem Lauf. Schwere Beine und Laufen kombiniert erhöht das Verletzungsrisiko und hemmt die Laufentwicklung. Der Lauf nach Oberkörper-Training ist dagegen problemlos — du läufst mit frischen Beinen.
+  </div>
+</section>
+
+<!-- ══ OBERKÖRPER ══ -->
+<section id="panel-upper" class="tab-panel">
+  <div class="section-heading">
+    <h2>Oberkörper A + B</h2>
+    <p>Beide Tage decken den gesamten Oberkörper ab — kein klassisches Push/Pull-Split mehr. Stattdessen horizontaler und vertikaler Fokus. Jede Muskelgruppe wird 2× pro Woche aus verschiedenen Winkeln trainiert. Sets & Reps im Hypertrophie-Bereich: <strong>3–4 Sätze × 8–12 Wdh</strong>, RPE 7–9.</p>
+  </div>
+
+  <div class="training-grid">
+
+    <!-- OK-A -->
+    <div class="t-card upper full">
+      <div class="t-card-header">
+        <h3>Oberkörper A — Horizontaler Fokus</h3>
+        <p>Bankdrücken-Linie · Rudern · Schulter-Assist · ~60–70 min</p>
+      </div>
+
+      <div class="ex-row">
+        <div><span class="ex-num">01</span><div class="ex-name">Schrägbankdrücken — Langhantel oder Kurzhantel</div><div class="ex-detail">4 × 8–10 · Obere Brust & anteriore Schulter · Schulterblätter zusammenziehen, Ellenbogen 60–70° zum Körper</div></div>
+        <span class="ex-badge badge-upper">4 × 8–10</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">02</span><div class="ex-name">Flachbank Kurzhantel-Drücken</div><div class="ex-detail">3 × 10–12 · Volle Brustbewegung, größerer ROM als Langhantel · Kontrolle in der Exzentrik 2–3 sek</div></div>
+        <span class="ex-badge badge-upper">3 × 10–12</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">03</span><div class="ex-name">Sitzrudern — Kabelzug oder Maschine</div><div class="ex-detail">4 × 10–12 · Mittlerer Rücken, Rhomboiden, Teres major · Ellenbogen eng am Körper, Schulterblätter zusammenführen</div></div>
+        <span class="ex-badge badge-upper">4 × 10–12</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">04</span><div class="ex-name">Chest-Supported Row — Maschine oder Schrägbank</div><div class="ex-detail">3 × 12 · Rücken entlastet, volle Konzentration auf Kontraktion · Ideal für saubere Technik ohne Ausweichen</div></div>
+        <span class="ex-badge badge-upper">3 × 12</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">05</span><div class="ex-name">Seitheben — Kabel oder Kurzhantel</div><div class="ex-detail">3 × 15–20 · Mittlerer Deltamuskel · Leichtes Gewicht, hohe Wiederholungen, langsam und kontrolliert</div></div>
+        <span class="ex-badge badge-upper">3 × 15–20</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">06</span><div class="ex-name">Kurzhantel-Curl — alternierend + Hammer Curl</div><div class="ex-detail">3 × 10 je + 3 × 12 Hammer · Beide Bizepsköpfe + Brachialis · Supination beim regulären Curl nicht vergessen</div></div>
+        <span class="ex-badge badge-upper">3 × 10+12</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">07</span><div class="ex-name">Trizeps Pushdown — Seil + Overhead Extension</div><div class="ex-detail">3 × 12 Pushdown + 3 × 12 Overhead · Langer Kopf (Overhead) wird oft vernachlässigt — ist aber der größte Anteil</div></div>
+        <span class="ex-badge badge-upper">3 × 12</span>
+      </div>
+    </div>
+
+    <!-- OK-B -->
+    <div class="t-card upper full">
+      <div class="t-card-header">
+        <h3>Oberkörper B — Vertikaler Fokus</h3>
+        <p>Schulterdrücken · Lat-Dominanz · Rotatorenmanschette · ~60–70 min</p>
+      </div>
+
+      <div class="ex-row">
+        <div><span class="ex-num">01</span><div class="ex-name">Schulterdrücken — Kurzhantel sitzend</div><div class="ex-detail">4 × 8–10 · Anteriore & mittlere Schulter · Neutraler Rücken, keine Hyperlordose — kein Ausweichen über die LWS</div></div>
+        <span class="ex-badge badge-upper">4 × 8–10</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">02</span><div class="ex-name">Kabel-Face Pull</div><div class="ex-detail">3 × 15–20 · Hintere Schulter & Rotatorenmanschette · Pflichtübung für Schultergesundheit — Kabel auf Augenhöhe, Ellenbogen hoch</div></div>
+        <span class="ex-badge badge-upper">3 × 15–20</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">03</span><div class="ex-name">Lat-Pulldown — weiter Griff</div><div class="ex-detail">4 × 10–12 · Latissimus, Teres major · Brust raus, Stange zur Brust ziehen, Schulterblätter runter und zusammen</div></div>
+        <span class="ex-badge badge-upper">4 × 10–12</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">04</span><div class="ex-name">T-Bar Rudern (oder Maschinen-Rudern eng)</div><div class="ex-detail">4 × 10–12 · Mittlerer Rücken, Lat, Rhomboiden · Beidseitig & stabil, enger Griff für mehr Lat-Dehnung. Brust an Pad falls vorhanden, Rücken neutral, Ellenbogen am Körper</div></div>
+        <span class="ex-badge badge-upper">4 × 10–12</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">05</span><div class="ex-name">Kabelzug-Fliegern — stehend (Pec-Deck Alternative)</div><div class="ex-detail">3 × 12–15 · Untere & innere Brust · Kabel auf mittlerer Höhe, Hände treffen sich vorne unten — volle Kontraktion halten</div></div>
+        <span class="ex-badge badge-upper">3 × 12–15</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">06</span><div class="ex-name">Klimmzüge oder Assisted Pull-Ups</div><div class="ex-detail">3 × max (min. 5) · Schulterbreiter Griff · Falls noch nicht möglich: Maschine oder Negativen (nur runter, 5 sek) · Ziel: saubere Bodyweight-Wiederholungen</div></div>
+        <span class="ex-badge badge-upper">3 × max</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">07</span><div class="ex-name">Superset: Reverse Fly + Band Pull-Apart</div><div class="ex-detail">3 × 15 + 3 × 20 · Hintere Schulter & Rhomboiden · Kein Gewicht — Schulterblätter führen, nicht die Arme</div></div>
+        <span class="ex-badge badge-upper">3 × 15+20</span>
+      </div>
+    </div>
+
+  </div><!-- /training-grid -->
+
+  <div class="note note-upper"><strong>Warum kein klassisches Push/Pull?</strong> Beim Push/Pull-Split trainierst du Schultern zweimal mit Drücken (Push-Tag + Schultertag) — oft unbalanciert. Mit horizontalem & vertikalem Fokus bekommt jede Muskelgruppe 2× pro Woche Stimulus aus verschiedenen Winkeln, mit weniger Überlappung und besserer Erholung für die Schultergelenke.</div>
+</section>
+
+<!-- ══ BEINE ══ -->
+<section id="panel-legs" class="tab-panel">
+  <div class="section-heading">
+    <h2>Beintag</h2>
+    <p>Ohne freie Kniebeugen, ohne schweres Deadlift — aber vollständig und effektiv. Fokus auf Quad-Dominanz via Maschine, Beinrückseite via RDL, und einbeinige Stabilität für den Lauf. Wirbelsäule bleibt geschont, Beine werden trotzdem vollständig entwickelt.</p>
+  </div>
+
+  <div class="training-grid">
+
+    <div class="t-card legs full">
+      <div class="t-card-header">
+        <h3>Beintag — Vollständig</h3>
+        <p>Quad · Beinrückseite · Gesäß · Wade · Stabilität · ~65–75 min</p>
+      </div>
+
+      <div class="ex-row">
+        <div><span class="ex-num">01</span><div class="ex-name">Beinpresse — mittlere Fußstellung</div><div class="ex-detail">4 × 10–12 · Quads & Gesäß · Füße hüftbreit, parallele Fußstellung. Tiefes Absenken (90°+), Knie in Linie mit Zehen. Kein komplettes Durchstrecken oben</div></div>
+        <span class="ex-badge badge-legs">4 × 10–12</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">02</span><div class="ex-name">Hack Squat Maschine</div><div class="ex-detail">4 × 8–10 · Quad-dominant, wirbelsäulenschonend · Rücken & Schultern fest am Polster, Füße mittig & schulterbreit. Tief absenken (Oberschenkel parallel oder tiefer), kontrollierte Exzentrik. Knie folgen den Zehen</div></div>
+        <span class="ex-badge badge-legs">4 × 8–10</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">03</span><div class="ex-name">Rumänisches Kreuzheben — Kurzhantel oder Langhantel</div><div class="ex-detail">3 × 10–12 · Hamstrings & Gluteus max · Hüfte zurück, Stangen nah am Körper, Rücken neutral. Dehnung in den Hamstrings spüren, nicht tiefer als kontrolliert möglich</div></div>
+        <span class="ex-badge badge-legs">3 × 10–12</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">04</span><div class="ex-name">Beinstrecker — Maschine</div><div class="ex-detail">3 × 12–15 · Isolierter Quad-Fokus · Volle Streckung, 1 sek halten oben. Optional: einbeinig für Seitenbalance testen</div></div>
+        <span class="ex-badge badge-legs">3 × 12–15</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">05</span><div class="ex-name">Beinbeuger — Maschine liegend</div><div class="ex-detail">3 × 12–15 · Isolierter Hamstring-Fokus · Langsame Exzentrik 2–3 sek, kontrolliert, Hüfte bleibt auf der Bank</div></div>
+        <span class="ex-badge badge-legs">3 × 12–15</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">06</span><div class="ex-name">Einbeinige Beinpresse oder Bulgarian Split Squat</div><div class="ex-detail">3 × 10 je Seite · Stabilität & Seitenbalance für den Lauf · Beginne mit Körpergewicht oder leichten KH · Bulgarian: Hinterfuß auf Bank, aufrechter Oberkörper</div></div>
+        <span class="ex-badge badge-legs">3 × 10/Seite</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">07</span><div class="ex-name">Hip Thrust — Kurzhantel oder Langhantel</div><div class="ex-detail">3 × 12–15 · Gluteus maximus Isolation · Schulterblätter auf Bank, Hüfte voll durchstrecken oben, 1 sek halten. Füße hüftbreit, Knie 90° oben</div></div>
+        <span class="ex-badge badge-legs">3 × 12–15</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">08</span><div class="ex-name">Wadenheben — stehend, einbeinig</div><div class="ex-detail">3 × 15–20 je Seite · Gastrocnemius & Soleus · Volle Bewegung: tief unten dehnen, hoch oben kontrahieren. Laufgesundheit der Wade</div></div>
+        <span class="ex-badge badge-legs">3 × 15–20</span>
+      </div>
+
+    </div>
+
+    <!-- Stabilität -->
+    <div class="t-card legs full">
+      <div class="t-card-header">
+        <h3>Lauf-Stabilität — 10 min Finish</h3>
+        <p>Am Ende des Beintages · Verletzungsprävention für den Lauf</p>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">A</span><div class="ex-name">Einbeiniger Stand + Augen zu</div><div class="ex-detail">3 × 30 sek je Seite · Propriozeption & Knöchelstabilität</div></div>
+        <span class="ex-badge badge-legs">3 × 30 sek</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">B</span><div class="ex-name">Seitsteps mit Widerstandsband</div><div class="ex-detail">3 × 15 je Seite · Gluteus medius — verhindert Knieeinwärtsfall beim Laufen</div></div>
+        <span class="ex-badge badge-legs">3 × 15</span>
+      </div>
+      <div class="ex-row">
+        <div><span class="ex-num">C</span><div class="ex-name">Copenhagen Plank</div><div class="ex-detail">3 × 20–30 sek je Seite · Adduktoren & Hüftstabilität · Seitstütz, oberes Bein auf Bank, unteres Bein hebt</div></div>
+        <span class="ex-badge badge-legs">3 × 20–30 sek</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note note-legs"><strong>Bein-Tag Timing:</strong> Mindestens 48 h vor dem nächsten Lauf einplanen. Die einbeinigen Übungen (Bulgarian, einbeinige Presse) sind direkt laufspezifisch — sie trainieren dieselbe Stabilisierungsarbeit die beim Laufen gefragt ist. Nicht weglassen, auch wenn die Beine schon müde sind.</div>
+</section>
+
+<!-- ══ LAUFAUFBAU ══ -->
+<section id="panel-run" class="tab-panel">
+  <div class="section-heading">
+    <h2>Laufaufbau — 8 Wochen</h2>
+    <p>Von fast 0 starten. Das Ziel in Woche 8: <strong style="color:var(--run)">30 min am Stück laufen ohne Pause</strong>. Das Programm basiert auf dem bewährten Walk-Run-Prinzip — keine Ego-Pace, keine Schnelligkeit. Alles in Zone 2: du kannst dabei noch sprechen.</p>
+  </div>
+
+  <!-- Wochen 1–8 -->
+  <div class="run-week open">
+    <div class="run-week-header" onclick="this.parentElement.classList.toggle('open')">
+      <h3>Woche 1 — Erste Schritte</h3>
+      <span class="wk-badge">2 Läufe</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="run-week-body">
+      <div class="run-session"><div class="run-day-label">Lauf 1</div><div><div class="run-desc">Walk-Run: 1 min laufen / 2 min gehen × 8</div><div class="run-sub">Total: ~24 min · Nasenpflaster · sehr leichte Intensität · Technik: aufrechte Haltung, kurze Schritte</div></div><div class="run-vol">~24 min</div></div>
+      <div class="run-session"><div class="run-day-label">Lauf 2</div><div><div class="run-desc">Walk-Run: 1 min laufen / 2 min gehen × 10</div><div class="run-sub">Total: ~30 min · leicht schneller als Lauf 1 aber immer noch komfortabel</div></div><div class="run-vol">~30 min</div></div>
+    </div>
+  </div>
+
+  <div class="run-week open">
+    <div class="run-week-header" onclick="this.parentElement.classList.toggle('open')">
+      <h3>Woche 2 — Intervalle verlängern</h3>
+      <span class="wk-badge">2 Läufe</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="run-week-body">
+      <div class="run-session"><div class="run-day-label">Lauf 1</div><div><div class="run-desc">Walk-Run: 2 min laufen / 2 min gehen × 7</div><div class="run-sub">Total: ~28 min · Laufanteil steigt auf 50%</div></div><div class="run-vol">~28 min</div></div>
+      <div class="run-session"><div class="run-day-label">Lauf 2</div><div><div class="run-desc">Walk-Run: 2 min laufen / 1 min gehen × 8</div><div class="run-sub">Total: ~24 min · Mehr Laufen als Gehen — erster Test</div></div><div class="run-vol">~24 min</div></div>
+    </div>
+  </div>
+
+  <div class="run-week">
+    <div class="run-week-header" onclick="this.parentElement.classList.toggle('open')">
+      <h3>Woche 3 — Blöcke aufbauen</h3>
+      <span class="wk-badge">2 Läufe</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="run-week-body">
+      <div class="run-session"><div class="run-day-label">Lauf 1</div><div><div class="run-desc">Walk-Run: 3 min laufen / 1 min gehen × 7</div><div class="run-sub">Total: ~28 min · Gehpausen nur noch kurz</div></div><div class="run-vol">~28 min</div></div>
+      <div class="run-session"><div class="run-day-label">Lauf 2</div><div><div class="run-desc">Walk-Run: 5 min laufen / 1 min gehen × 5</div><div class="run-sub">Total: ~30 min · Erste 5-Minuten-Blöcke — Tempo muss wirklich langsam sein</div></div><div class="run-vol">~30 min</div></div>
+    </div>
+  </div>
+
+  <div class="run-week">
+    <div class="run-week-header" onclick="this.parentElement.classList.toggle('open')">
+      <h3>Woche 4 — Deload</h3>
+      <span class="wk-badge">1–2 Läufe</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="run-week-body">
+      <div class="run-session"><div class="run-day-label">Lauf 1</div><div><div class="run-desc">Walk-Run: 2 min laufen / 2 min gehen × 6</div><div class="run-sub">Leichter als die Vorwochen — Körper erholt sich und festigt die Anpassungen</div></div><div class="run-vol">~24 min</div></div>
+      <div class="run-session"><div class="run-day-label">Optional</div><div><div class="run-desc">Lockerere Einheit: 20 min Spazieren mit kurzen Laufintervallen nach Gefühl</div><div class="run-sub">Kein Druck — hör auf den Körper</div></div><div class="run-vol">~20 min</div></div>
+    </div>
+  </div>
+
+  <div class="run-week">
+    <div class="run-week-header" onclick="this.parentElement.classList.toggle('open')">
+      <h3>Woche 5 — Kontinuierliches Laufen beginnt</h3>
+      <span class="wk-badge">2 Läufe</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="run-week-body">
+      <div class="run-session"><div class="run-day-label">Lauf 1</div><div><div class="run-desc">8 min laufen / 1 min gehen × 3</div><div class="run-sub">Total: ~27 min · Erste echte 8-Minuten-Blöcke — sehr langsam bleiben</div></div><div class="run-vol">~27 min</div></div>
+      <div class="run-session"><div class="run-day-label">Lauf 2</div><div><div class="run-desc">10 min laufen / 1 min gehen × 2 + 5 min Finish</div><div class="run-sub">Total: ~27 min · Mentaler Schritt: 10 Minuten am Stück</div></div><div class="run-vol">~27 min</div></div>
+    </div>
+  </div>
+
+  <div class="run-week">
+    <div class="run-week-header" onclick="this.parentElement.classList.toggle('open')">
+      <h3>Woche 6 — Längere Blöcke</h3>
+      <span class="wk-badge">2 Läufe</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="run-week-body">
+      <div class="run-session"><div class="run-day-label">Lauf 1</div><div><div class="run-desc">15 min laufen / 1 min gehen / 15 min laufen</div><div class="run-sub">Total: ~31 min · Kurze Pause in der Mitte, kein Schwächezeichen — strukturiert eingebaut</div></div><div class="run-vol">~31 min</div></div>
+      <div class="run-session"><div class="run-day-label">Lauf 2</div><div><div class="run-desc">20 min kontinuierlich laufen</div><div class="run-sub">Erster 20-Minuten-Lauf ohne Pause — Tempo sehr langsam. Wenn nötig: 30 sek gehen, dann weiter</div></div><div class="run-vol">20 min</div></div>
+    </div>
+  </div>
+
+  <div class="run-week">
+    <div class="run-week-header" onclick="this.parentElement.classList.toggle('open')">
+      <h3>Woche 7 — Aufbau zu 30 min</h3>
+      <span class="wk-badge">2 Läufe</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="run-week-body">
+      <div class="run-session"><div class="run-day-label">Lauf 1</div><div><div class="run-desc">25 min kontinuierlich laufen</div><div class="run-sub">Gleichmäßiges Tempo, Zone 2 — kein Sprint-Finish</div></div><div class="run-vol">25 min</div></div>
+      <div class="run-session"><div class="run-day-label">Lauf 2</div><div><div class="run-desc">20 min + 5 min etwas flotter (gefühlter Tempowechsel)</div><div class="run-sub">Erste Variation im Tempo — kein echtes Intervall, nur ein bewusstes Leicht-Anziehen</div></div><div class="run-vol">25 min</div></div>
+    </div>
+  </div>
+
+  <div class="run-week">
+    <div class="run-week-header" onclick="this.parentElement.classList.toggle('open')">
+      <h3>Woche 8 — Zielwoche 🎯</h3>
+      <span class="wk-badge">2 Läufe</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="run-week-body">
+      <div class="run-session"><div class="run-day-label">Lauf 1</div><div><div class="run-desc">25 min locker — Formcheck-Lauf</div><div class="run-sub">Entspannt, Technik im Fokus: aufrecht, kurze Schritte, Nasenatmung, Arme entspannt</div></div><div class="run-vol">25 min</div></div>
+      <div class="run-session"><div class="run-day-label">Lauf 2 🎯</div><div><div class="run-desc">30 min kontinuierlich laufen — Ziel erreicht</div><div class="run-sub">Kein Druck auf Tempo. Lass es natürlich kommen. Nach 8 Wochen wird dein Körper bereit sein</div></div><div class="run-vol">30 min</div></div>
+    </div>
+  </div>
+
+  <div class="note note-run" style="margin-top:16px;">
+    <strong>Zone 2 bedeutet:</strong> Du kannst dabei einen vollständigen Satz sprechen, ohne nach Luft zu schnappen. Wenn du keuchst, bist du zu schnell. Lieber 2 min/km langsamer laufen als geplant — Zone 2 aufzubauen ist der entscheidende Grundstein für alles was danach kommt.
+  </div>
+</section>
+
+<!-- ══ PROGRESSION ══ -->
+<section id="panel-prog" class="tab-panel">
+  <div class="section-heading">
+    <h2>Progression & Periodisierung</h2>
+    <p>Wie du Gewichte, Volumen und Laufumfang sinnvoll steigern kannst — ohne Plateau und ohne Verletzung.</p>
+  </div>
+
+  <div class="training-grid">
+
+    <div class="t-card prog full">
+      <div class="t-card-header">
+        <h3>Krafttraining — Progression</h3>
+        <p>Doppelte Progressive Overload Strategie</p>
+      </div>
+      <div class="ex-row">
+        <div><div class="ex-name">Wiederholungs-Progression (Woche 1–3)</div><div class="ex-detail">Starte immer am unteren Ende des Bereichs (z.B. 8 Wdh). Jede Woche 1–2 Wdh mehr bis du das obere Ende erreichst (z.B. 12 Wdh)</div></div>
+        <span class="ex-badge badge-neu">Stufe 1</span>
+      </div>
+      <div class="ex-row">
+        <div><div class="ex-name">Gewichts-Progression (Woche 4)</div><div class="ex-detail">Wenn du alle Sätze am oberen Ende der Wdh-Spanne schaffst: Gewicht um 2,5–5 kg erhöhen, zurück zum unteren Wdh-Bereich</div></div>
+        <span class="ex-badge badge-neu">Stufe 2</span>
+      </div>
+      <div class="ex-row">
+        <div><div class="ex-name">Deload alle 4–6 Wochen</div><div class="ex-detail">Eine Woche mit 60–70% des normalen Gewichts und/oder Volumen reduzieren. Keine Schwäche — Muskelwachstum passiert in der Erholung</div></div>
+        <span class="ex-badge badge-neu">Deload</span>
+      </div>
+      <div class="ex-row">
+        <div><div class="ex-name">RPE-Kontrolle</div><div class="ex-detail">RPE 7 = 3 Wdh in Reserve · RPE 8 = 2 Wdh in Reserve · RPE 9 = 1 Wdh in Reserve. Kein Training bis RPE 10 (Muskelversagen) in den ersten 8 Wochen</div></div>
+        <span class="ex-badge badge-neu">RPE</span>
+      </div>
+    </div>
+
+    <div class="t-card prog full">
+      <div class="t-card-header">
+        <h3>Lauf — Progression nach Woche 8</h3>
+        <p>Wenn 30 min am Stück möglich sind</p>
+      </div>
+      <div class="ex-row">
+        <div><div class="ex-name">10%-Regel für Laufumfang</div><div class="ex-detail">Wöchentlicher Gesamtumfang (in Minuten oder km) nie um mehr als 10% steigern. Die häufigste Ursache für Laufverletzungen ist zu schnelles Volumen-Wachstum</div></div>
+        <span class="ex-badge badge-neu">Regel</span>
+      </div>
+      <div class="ex-row">
+        <div><div class="ex-name">Nächste Ziele nach Woche 8</div><div class="ex-detail">Woche 9–12: 3 Läufe/Woche einführen · Woche 12–16: einen Lauf auf 45 min verlängern · Woche 16–20: Tempo-Einheit einführen (1× kurze Intervalle)</div></div>
+        <span class="ex-badge badge-neu">Aufbau</span>
+      </div>
+      <div class="ex-row">
+        <div><div class="ex-name">Tempo-Einheiten erst ab Woche 12+</div><div class="ex-detail">Kein Intervalltraining in den ersten 8 Wochen — Sehnen und Bänder brauchen länger zur Anpassung als die Muskeln. Zone 2 zuerst vollständig aufbauen</div></div>
+        <span class="ex-badge badge-warn">Wichtig</span>
+      </div>
+    </div>
+
+    <div class="t-card prog full">
+      <div class="t-card-header">
+        <h3>Wochenplan — Gesamtübersicht 8 Wochen</h3>
+        <p>Periodisierung Kraft + Lauf kombiniert</p>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="prog-table">
+          <thead><tr><th>Phase</th><th>Wochen</th><th>Kraft-Fokus</th><th>Lauf-Fokus</th><th>Charakter</th></tr></thead>
+          <tbody>
+            <tr><td>Eingewöhnung</td><td>1–2</td><td>Technik lernen, 3 Sätze, niedrige Intensität</td><td>Walk-Run 1:2</td><td>Fundament legen</td></tr>
+            <tr><td>Aufbau I</td><td>3–4</td><td>4 Sätze, progressive Wdh, RPE 7–8</td><td>Walk-Run 2:1 → 3:1</td><td>Volumen steigern</td></tr>
+            <tr><td>Aufbau II</td><td>5–6</td><td>Volumen hoch, erste Gewichtssteigerungen</td><td>Blöcke 5–15 min</td><td>Belastung erhöhen</td></tr>
+            <tr><td>Peak</td><td>7–8</td><td>Höchste Arbeitsgewichte bis jetzt</td><td>Erster 20–30 min Lauf</td><td>Ziele erreichen</td></tr>
+            <tr><td>Deload</td><td>9</td><td>60–70% Gewicht, halbes Volumen</td><td>1 lockerer Lauf</td><td>Supercompensation</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note note-prog"><strong>Die wichtigste Regel:</strong> Wenn du an einem Tag merkst dass Technik oder Kraft deutlich schlechter sind als sonst — Gewicht reduzieren, kein Ego. Schlechte Trainingstage existieren. Ein guter Trainingsplan ist einer dem du 6 Monate lang folgst, nicht einer der auf dem Papier optimal aussieht aber dich in Woche 3 verletzt.</div>
+</section>
+
+
+</div>
+
+<!-- ══ ERNÄHRUNG MODE ══ -->
+<div class="mode-section" id="mode-ernaehrung">
+
+<section id="panel-phil" class="tab-panel active">
+  <div class="section-heading">
+    <h2>Deine Ernährungsphilosophie</h2>
+    <p>Vollwertig, unverarbeitet, nährstoffdicht — kein Zählen, kein Verzicht. Zugeschnitten auf dich: <strong style="color:#34d399">77 kg · 1,81 m · ~23% KFA · Ziel: Recomposition</strong></p>
+  </div>
+
+  <div class="flex-note" style="margin-bottom:16px;border-left:3px solid #34d399;">
+    <h3 style="color:#34d399">📊 Dein persönlicher Rahmen</h3>
+    <table class="flex-table">
+      <tr><td>Protein/Tag</td><td><strong>138–154 g</strong> (1,8–2 g × 77 kg) — Fleisch, Eier, Quark/Skyr</td></tr>
+      <tr><td>Trainingstag</td><td><strong>~2.600–2.800 kcal</strong> — mehr KH, volles Protein</td></tr>
+      <tr><td>Ruhetag</td><td><strong>~2.100–2.300 kcal</strong> — weniger KH, Protein gleich hoch</td></tr>
+      <tr><td>Wasser</td><td><strong>3,0 L normal · 3,5 L Trainings-/Saunatag</strong> → Water-Tracker oben</td></tr>
+      <tr><td>Mahlzeiten</td><td><strong>3 Hauptmahlzeiten</strong> in 10–12 h Fenster</td></tr>
+    </table>
+  </div>
+
+  <div class="training-grid">
+
+    <div class="t-card upper">
+      <div class="t-card-header"><h3>🥩 Protein</h3><p>Ziel: 138–154 g täglich</p></div>
+      <div class="ex-row"><div><div class="ex-name">Rinderhack 5% Fett — Supermarkt</div><div class="ex-detail"><strong>150–200 g/Mahlzeit</strong> · Günstigste vollwertige Proteinquelle Deutschlands · 5% Fett = maximaler Proteinanteil · Aldi/Lidl/Rewe, einfrieren was du nicht brauchst</div></div><span class="ex-badge badge-upper">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Hähnchen — Supermarkt</div><div class="ex-detail"><strong>150–200 g/Mahlzeit</strong> · Oberschenkel fettreicher & aromatischer als Brust · TK-Ware genauso gut und günstiger</div></div><span class="ex-badge badge-upper">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Eier (ganze Eier)</div><div class="ex-detail"><strong>3–4 täglich</strong> · Eigelb nicht wegwerfen — Cholin, fettlösliche Vitamine, gesunde Fette · Freilandhaltung (Code 1) im Supermarkt reicht</div></div><span class="ex-badge badge-upper">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Magerquark oder Skyr im Wechsel</div><div class="ex-detail"><strong>200–250 g täglich</strong> · Magerquark: ~13 g Protein/100 g, günstiger · Skyr: ~11 g Protein/100 g, cremiger, mehr Calcium · Beide gleichwertig — nach Geschmack wählen</div></div><span class="ex-badge badge-upper">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Käse (Vollfett)</div><div class="ex-detail">Gouda, Emmentaler, Parmesan — natürliche K2-Quelle · Als Snack oder zur Mahlzeit · <strong>30–50 g täglich</strong></div></div><span class="ex-badge badge-upper">täglich</span></div>
+    </div>
+
+    <div class="t-card legs">
+      <div class="t-card-header"><h3>🥔 Kohlenhydrate</h3><p>Trainingstag mehr, Ruhetag weniger</p></div>
+      <div class="ex-row"><div><div class="ex-name">Kartoffeln</div><div class="ex-detail"><strong>150–200 g gegart</strong> Trainingstag · <strong>100–120 g</strong> Ruhetag · Günstig, sättigend, nährstoffreich · gekocht oder gebacken</div></div><span class="ex-badge badge-legs">Basis</span></div>
+      <div class="ex-row"><div><div class="ex-name">Basmati- / Jasminreis</div><div class="ex-detail"><strong>150–200 g gegart</strong> an Trainingstagen · Post-Training Kohlenhydratquelle · Großpackung günstiger</div></div><span class="ex-badge badge-legs">Training</span></div>
+      <div class="ex-row"><div><div class="ex-name">ESN Reispudding + Haferflocken (50/50)</div><div class="ex-detail"><strong>50 g ESN Reispudding + 40 g Haferflocken</strong> · Haferflocken: Beta-Glucan & Ballaststoffe · ESN: cremiger, schnell · Dazu 1 Prise Ceylon-Zimt direkt in die Schüssel · Kombi ist besser als beides allein</div></div><span class="ex-badge badge-legs">Frühstück</span></div>
+      <div class="ex-row"><div><div class="ex-name">Datteln (Medjool) & Honig Imkermeister Krüger</div><div class="ex-detail">Datteln: 2–3 Stück Pre-Workout · Honig Imkermeister Krüger: 1–2 TL täglich auf Frühstück — nicht pasteurisiert, Enzyme erhalten, nie erhitzen</div></div><span class="ex-badge badge-legs">Pre-WO</span></div>
+      <div class="ex-row"><div><div class="ex-name">TK-Früchte & Bananen</div><div class="ex-detail">TK-Beeren genauso nährstoffreich wie frisch, günstiger · <strong>Banane</strong> vor dem Lauf ideal · Aldi/Lidl TK-Abteilung</div></div><span class="ex-badge badge-legs">täglich</span></div>
+    </div>
+
+    <div class="t-card run">
+      <div class="t-card-header"><h3>🫒 Fette</h3><p>Hormone, Gelenke, Gehirn — nicht kürzen</p></div>
+      <div class="ex-row"><div><div class="ex-name">Butter (Weide/Bio)</div><div class="ex-detail">Zum Braten und Würzen — Weidebutter enthält K2 & CLA natürlich · Kerrygold oder Rewe Bio · <strong>1 EL pro Mahlzeit</strong></div></div><span class="ex-badge badge-run">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Olivenöl Extra Vergine (kalt)</div><div class="ex-detail">Kalt über Salate und fertige Gerichte — nicht erhitzen über 180°C · Oleocanthal: anti-inflammatorisch · <strong>1–2 EL täglich</strong> · Aldi/Lidl Eigenmarke gut</div></div><span class="ex-badge badge-run">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Avocado</div><div class="ex-detail">2–3× pro Woche · einfach ungesättigte Fette, Kalium, Folat · ersetzt Nüsse als hochwertige Fettquelle · ½ Avocado zur Mahlzeit oder als Snack</div></div><span class="ex-badge badge-run">regelmäßig</span></div>
+    </div>
+
+    <div class="t-card prog">
+      <div class="t-card-header"><h3>🌿 Gemüse & Gewürze</h3><p>3–4 Portionen täglich</p></div>
+      <div class="ex-row"><div><div class="ex-name">Brokkoli & Blumenkohl</div><div class="ex-detail">Sulforaphan: stärkste natürliche Entzündungshemmung · TK genauso gut wie frisch und günstiger · 3–4× pro Woche</div></div><span class="ex-badge badge-neu">Pflicht</span></div>
+      <div class="ex-row"><div><div class="ex-name">Spinat & Paprika</div><div class="ex-detail">Spinat: Magnesium, Folat, Eisen · Paprika: meiste natürliche Vitamin C-Quelle aller Gemüse · TK oder frisch, täglich</div></div><span class="ex-badge badge-neu">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Knoblauch & Zwiebeln</div><div class="ex-detail">Täglich beim Kochen · roh am wirksamsten · Allicin: immunmodulierend · Netzweise kaufen ist günstiger</div></div><span class="ex-badge badge-neu">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Frischer Ingwer</div><div class="ex-detail">Gingerole: entzündungshemmend, verdauungsfördernd · <strong>Tipp: einfrieren</strong> — gefrorenen Ingwer direkt reiben ohne auftauen, hält Wochen</div></div><span class="ex-badge badge-neu">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Kurkuma + schwarzer Pfeffer</div><div class="ex-detail">Immer zusammen — Pfeffer macht Curcumin 20× bioverfügbarer · Täglich beim Kochen</div></div><span class="ex-badge badge-neu">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Ceylon-Zimt</div><div class="ex-detail">Wichtig: Ceylon, nicht Cassia (zu hoher Cumarin-Gehalt bei täglichem Konsum) · Täglich ins Frühstück (Reispudding + Haferflocken) · dm / Reformhaus / Online</div></div><span class="ex-badge badge-neu">täglich</span></div>
+    </div>
+
+  </div>
+
+  <div class="note note-run" style="margin-top:12px;">
+    <strong>Honig Imkermeister Krüger</strong> — nicht pasteurisiert, regionaler Imker. Enzyme & Antioxidantien erhalten. Nie erhitzen. 1–2 TL täglich.
+  </div>
+</section>
+
+<section id="panel-timing" class="tab-panel">
+  <div class="section-heading">
+    <h2>Mahlzeiten-Timing</h2>
+    <p>Wann du was isst ist fast so wichtig wie was du isst — besonders rund ums Training.</p>
+  </div>
+
+  <div class="training-grid">
+
+    <div class="t-card upper full">
+      <div class="t-card-header"><h3>🌅 Frühstück</h3><p>Iss wenn du hungrig bist, nicht aus Gewohnheit</p></div>
+      <div class="ex-row"><div><div class="ex-name">Option A — Frühstücksbowl (Trainingstag)</div><div class="ex-detail"><strong>50 g ESN Reispudding + 40 g Haferflocken</strong> mit heißem Wasser + <strong>150 g Quark/Skyr</strong> + TK-Beeren + 1 TL Honig Imkermeister Krüger + 1 Prise Ceylon-Zimt direkt in die Schüssel</div></div><span class="ex-badge badge-upper">Empfohlen</span></div>
+      <div class="ex-row"><div><div class="ex-name">Option B — Eier-Fokus</div><div class="ex-detail"><strong>3–4 Eier</strong> Rührei in Butter + 150 g Quark/Skyr + TK-Beeren · Kein Getreide — für Tage wo du direkt mit Protein starten willst</div></div><span class="ex-badge badge-upper">Krafttag</span></div>
+      <div class="ex-row"><div><div class="ex-name">Option C — Leicht (Ruhetag)</div><div class="ex-detail"><strong>200 g Skyr</strong> + Banane + 2–3 Datteln + 1 TL Honig · Keine großen KH wenn kein Training</div></div><span class="ex-badge badge-upper">Ruhetag</span></div>
+    </div>
+
+    <div class="t-card legs full">
+      <div class="t-card-header"><h3>⚡ Pre-Training</h3><p>1,5–2 h vor dem Training</p></div>
+      <div class="ex-row"><div><div class="ex-name">Vor Krafttraining</div><div class="ex-detail"><strong>150–200 g Reis oder Kartoffeln</strong> + <strong>150 g Hähnchen oder Rinderhack</strong> + Gemüse + Butter · Kein großes Fett direkt vorher · Kollagen 15 g + Vit C 30–45 min vorher</div></div><span class="ex-badge badge-legs">Kraft</span></div>
+      <div class="ex-row"><div><div class="ex-name">Vor dem Laufen</div><div class="ex-detail"><strong>Banane + 2–3 Datteln</strong> 30–45 min vorher · oder vollständige Mahlzeit 2 h vorher · Rote Beete Saft 2–3 h vorher</div></div><span class="ex-badge badge-legs">Lauftag</span></div>
+      <div class="ex-row"><div><div class="ex-name">Nüchtern trainieren?</div><div class="ex-detail">Zone-2-Läufe bis 30 min: möglich, fördert Fettverbrennung · Krafttraining nüchtern: nicht empfohlen</div></div><span class="ex-badge badge-warn">Hinweis</span></div>
+    </div>
+
+    <div class="t-card run full">
+      <div class="t-card-header"><h3>🔄 Post-Training Fenster</h3><p>30–60 min nach dem Training</p></div>
+      <div class="ex-row"><div><div class="ex-name">Protein sofort (30–40 g)</div><div class="ex-detail"><strong>200 g Quark/Skyr</strong> oder <strong>3–4 Eier</strong> oder <strong>150 g Rinderhack/Hähnchen</strong> · Innerhalb 60 min</div></div><span class="ex-badge badge-run">Pflicht</span></div>
+      <div class="ex-row"><div><div class="ex-name">KH nach Krafttraining</div><div class="ex-detail"><strong>150–250 g Kartoffeln oder Reis</strong> + Protein · Glykogen auffüllen, Fett in dieser Mahlzeit reduzieren</div></div><span class="ex-badge badge-run">Kraft</span></div>
+      <div class="ex-row"><div><div class="ex-name">Nach dem Laufen</div><div class="ex-detail">Normale vollwertige Mahlzeit reicht — kein Überessen, Zone-2-Läufe verbrennen Fett</div></div><span class="ex-badge badge-run">Laufen</span></div>
+    </div>
+
+    <div class="t-card prog full">
+      <div class="t-card-header"><h3>🌙 Abendessen & Kasein-Snack</h3><p>Protein-Fokus, weniger KH</p></div>
+      <div class="ex-row"><div><div class="ex-name">Hauptmahlzeit Abend</div><div class="ex-detail"><strong>150–200 g Rinderhack oder Hähnchen</strong> + viel Gemüse + Butter oder Olivenöl · Weniger KH als mittags</div></div><span class="ex-badge badge-neu">täglich</span></div>
+      <div class="ex-row"><div><div class="ex-name">Kasein-Snack (optional)</div><div class="ex-detail"><strong>200 g Magerquark</strong> + 1 TL Honig + Zimt — 60–90 min vor dem Schlafen · Kasein versorgt Muskeln über Nacht · Besonders an Trainingstagen</div></div><span class="ex-badge badge-neu">Optional</span></div>
+      <div class="ex-row"><div><div class="ex-name">2 h vor dem Schlafen nichts mehr</div><div class="ex-detail">Verdauung stört Tiefschlaf und nächtliche GH-Ausschüttung · Ausnahme: Kasein-Snack</div></div><span class="ex-badge badge-warn">Hinweis</span></div>
+    </div>
+
+  </div>
+</section>
+
+<section id="panel-tag" class="tab-panel">
+  <div class="section-heading">
+    <h2>Beispieltag</h2>
+    <p>Zugeschnitten auf dich (77 kg) — als Vorlage, nicht als Zwang.</p>
+  </div>
+
+  <div class="t-card upper full" style="margin-bottom:10px;">
+    <div class="t-card-header"><h3>💪 Krafttraining-Tag (~2.600 kcal · ~180 g Protein)</h3><p>Oberkörper mittags</p></div>
+    <div class="ex-row"><div><div class="ex-name">07:00 — Aufwachen</div><div class="ex-detail">500 ml Wasser + ausgepresste Zitrone + 1–2 TL Apfelessig · 1 TL Schwarzkümmelöl · Sonnenlicht · Kaltdusche · Morgenroutine · Wasser-Tracker starten</div></div><span class="ex-badge badge-run">Nüchtern</span></div>
+    <div class="ex-row"><div><div class="ex-name">08:00 — Frühstück (~500 kcal · ~35 g P)</div><div class="ex-detail">50 g ESN Reispudding + 40 g Haferflocken + 1 TL Flohsamenschalen + 150 g Quark/Skyr + TK-Beeren + 1 TL Honig + Ceylon-Zimt · D3/K2, Vit C, Omega-3, Creatin</div></div><span class="ex-badge badge-upper">Frühstück</span></div>
+    <div class="ex-row"><div><div class="ex-name">11:00 — Pre-Training (~550 kcal · ~40 g P)</div><div class="ex-detail">160 g Reis (gegart) + 150 g Hähnchen + Brokkoli + Butter · Kollagen 15 g + Vit C 30 min vorher</div></div><span class="ex-badge badge-legs">Pre-WO</span></div>
+    <div class="ex-row"><div><div class="ex-name">12:30 — Oberkörper Training</div><div class="ex-detail">~65 min · Wasser + Elektrolyte · Wasser-Tracker auffüllen</div></div><span class="ex-badge badge-run">Training</span></div>
+    <div class="ex-row"><div><div class="ex-name">14:00 — Post-Training (~600 kcal · ~45 g P)</div><div class="ex-detail">200 g Kartoffeln + 180 g Rinderhack 5% + Paprika + Spinat in Butter</div></div><span class="ex-badge badge-upper">Post-WO</span></div>
+    <div class="ex-row"><div><div class="ex-name">17:00 — Snack optional (~200 kcal)</div><div class="ex-detail">30–40 g Käse + 2–3 Datteln oder ½ Avocado · Nur bei echtem Hunger</div></div><span class="ex-badge badge-legs">Optional</span></div>
+    <div class="ex-row"><div><div class="ex-name">19:30 — Abendessen (~550 kcal · ~40 g P)</div><div class="ex-detail">180 g Rinderhack oder Hähnchen + Brokkoli + Paprika + Zwiebel + Knoblauch + Olivenöl + frischer Ingwer · Zink nach dem Essen</div></div><span class="ex-badge badge-upper">Abend</span></div>
+    <div class="ex-row"><div><div class="ex-name">21:00 — Kasein-Snack (~180 kcal · ~22 g P)</div><div class="ex-detail">200 g Magerquark + 1 TL Honig + Zimt · Ashwagandha + Magnesium · Mouth Tape anlegen</div></div><span class="ex-badge badge-legs">Kasein</span></div>
+  </div>
+
+  <div class="t-card run full">
+    <div class="t-card-header"><h3>🏃 Lauftag (~2.200 kcal · ~160 g Protein)</h3><p>Zone 2 vormittags</p></div>
+    <div class="ex-row"><div><div class="ex-name">07:00 — Aufwachen</div><div class="ex-detail">Wasser + Zitrone + Apfelessig · Schwarzkümmelöl · Morgenroutine</div></div><span class="ex-badge badge-run">Nüchtern</span></div>
+    <div class="ex-row"><div><div class="ex-name">08:00 — Frühstück (~480 kcal · ~30 g P)</div><div class="ex-detail">50 g ESN Reispudding + 40 g Haferflocken + 1 TL Flohsamenschalen + 150 g Skyr + Banane + 1 TL Honig + Ceylon-Zimt · Supplements morgens</div></div><span class="ex-badge badge-run">Frühstück</span></div>
+    <div class="ex-row"><div><div class="ex-name">09:00 — Rote Beete Saft</div><div class="ex-detail">200–300 ml · Nitrat-Peak trifft Lauf um 11 Uhr · Danach keine Mundspülung!</div></div><span class="ex-badge badge-run">Pre-Lauf</span></div>
+    <div class="ex-row"><div><div class="ex-name">10:30 — Snack + Vorbereitung</div><div class="ex-detail">Banane + 2 Datteln · Kollagen 15 g + Vit C · Nasenpflaster anlegen</div></div><span class="ex-badge badge-legs">Pre-Lauf</span></div>
+    <div class="ex-row"><div><div class="ex-name">11:30 — Lauf draußen</div><div class="ex-detail">Zone 2 · Nasenpflaster · 20–35 min je nach Woche · Tiger Balm WEISS danach · Wechseldusche</div></div><span class="ex-badge badge-run">Laufen</span></div>
+    <div class="ex-row"><div><div class="ex-name">13:00 — Mittagessen (~550 kcal · ~40 g P)</div><div class="ex-detail">150 g Hähnchen + 160 g Kartoffeln + Brokkoli + Paprika + Olivenöl</div></div><span class="ex-badge badge-upper">Mittag</span></div>
+    <div class="ex-row"><div><div class="ex-name">19:30 — Abendessen (~530 kcal · ~38 g P)</div><div class="ex-detail">180 g Rinderhack + Gemüse + Butter + Ingwer · Zink nach dem Essen</div></div><span class="ex-badge badge-upper">Abend</span></div>
+  </div>
+
+  <div class="note note-run"><strong>Protein im Blick halten:</strong> 138–154 g täglich ist dein einziges aktives Ziel. Wenn du vollwertige Lebensmittel in diesen Mengen isst, ergibt sich alles andere von selbst.</div>
+</section>
+
+<section id="panel-food" class="tab-panel">
+  <div class="section-heading">
+    <h2>Einkaufsliste</h2>
+    <p>Gute Qualität zu sinnvollen Preisen — in Deutschland überall verfügbar.</p>
+  </div>
+
+  <div class="training-grid">
+
+    <div class="t-card upper">
+      <div class="t-card-header"><h3>🥩 Protein</h3><p>Wöchentlich kaufen</p></div>
+      <div class="ex-row"><div><div class="ex-name">Rinderhack 5% Fett</div><div class="ex-detail">Aldi/Lidl/Rewe — 500 g Packung · einfrieren was du nicht sofort brauchst</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Hähnchen (Oberschenkel oder Brust)</div><div class="ex-detail">Supermarkt — TK-Ware genauso gut · Oberschenkel günstiger & aromatischer</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Eier (10–20 Stk)</div><div class="ex-detail">Freilandhaltung Code 1 — Aldi/Lidl Eigenmarke ist vollkommen ausreichend</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Magerquark (500 g)</div><div class="ex-detail">Aldi-Eigenmarke gut und günstig · Milram wenn du es cremiger magst</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Skyr (500 g)</div><div class="ex-detail">Arla oder Rewe-Eigenmarke · im Wechsel mit Magerquark</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Gouda / Emmentaler am Stück</div><div class="ex-detail">Stück günstiger als Scheiben · 150–200 g pro Woche</div></div></div>
+    </div>
+
+    <div class="t-card legs">
+      <div class="t-card-header"><h3>🥔 Kohlenhydrate & Frühstück</h3><p>Energiebasis</p></div>
+      <div class="ex-row"><div><div class="ex-name">Kartoffeln (2 kg/Woche)</div><div class="ex-detail">Lose kaufen — günstigste Kohlenhydratquelle · festkochend für Pfanne, mehligkochend für Brei</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Basmati- / Jasminreis (1 kg)</div><div class="ex-detail">Großpackung — hält Monate · Aldi/Lidl Eigenmarke reicht vollkommen</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">ESN Designer Reispudding (3 kg)</div><div class="ex-detail">Online, Rossmann oder dm · 30 Portionen à 100 g · immer vorrätig haben</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Zarte Haferflocken (500 g)</div><div class="ex-detail">Supermarkt Eigenmarke · 40 g täglich mit ESN Reispudding mischen</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Datteln Medjool (200–300 g)</div><div class="ex-detail">Supermarkt oder türkischer Laden günstiger · Pre-Workout Energie</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">TK-Beeren (750 g–1 kg Beutel)</div><div class="ex-detail">Aldi/Lidl TK — Heidel-, Erd-, Brombeere · direkt auf Frühstück ohne auftauen</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Bananen</div><div class="ex-detail">Immer vorrätig — günstigstes Pre-Workout Lebensmittel</div></div></div>
+    </div>
+
+    <div class="t-card run">
+      <div class="t-card-header"><h3>🫒 Fette & Extras</h3></div>
+      <div class="ex-row"><div><div class="ex-name">Butter Weide/Bio</div><div class="ex-detail">Kerrygold oder Rewe Bio — K2 & CLA · Bratfett für alles</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Olivenöl Extra Vergine</div><div class="ex-detail">Aldi/Lidl Eigenmarke oft gut · kalt verwenden · 750 ml Flasche</div></div></div>
+      </div>
+      </div>
+      <div class="ex-row"><div><div class="ex-name">Honig Imkermeister Krüger</div><div class="ex-detail">Nicht pasteurisiert · Online oder Reformhaus · nie erhitzen · 1–2 TL täglich</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Schwarzkümmelöl kaltgepresst (250 ml)</div><div class="ex-detail">Reformhaus / dm / Online · kalt verwenden · hält ~2–3 Monate</div></div></div>
+    </div>
+
+    <div class="t-card prog">
+      <div class="t-card-header"><h3>🌿 Gewürze & Frisches</h3><p>Wöchentlich</p></div>
+      <div class="ex-row"><div><div class="ex-name">Zitronen (4–6 Stk)</div><div class="ex-detail">Täglich eine ins Morgenwasser · Bio wenn möglich · Supermarkt</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Frischer Ingwer</div><div class="ex-detail">Einfrieren! Direkt gefroren reiben — hält Wochen · Supermarkt</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Knoblauch & Zwiebeln</div><div class="ex-detail">Netzweise kaufen günstiger · täglich beim Kochen</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Ceylon-Zimt</div><div class="ex-detail">Nicht Cassia! Ceylon = hell, aromatisch, sicher täglich · dm / Reformhaus / Online</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Kurkuma + schwarzer Pfeffer</div><div class="ex-detail">Immer zusammen — Pfeffer macht Curcumin 20× wirksamer</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">Rote Beete Saft konzentriert</div><div class="ex-detail">James White o.ä. · 70 ml = 300 ml normaler Saft · Lauftage 2–3 h vorher</div></div></div>
+      <div class="ex-row"><div><div class="ex-name">TK-Brokkoli + frische Paprika</div><div class="ex-detail">TK-Brokkoli günstiger, genauso gut · Paprika frisch kaufen wöchentlich</div></div></div>
+    </div>
+
+    <div class="t-card upper full">
+      <div class="t-card-header"><h3>🚫 Komplett raus</h3></div>
+      <div class="ex-row"><div><div class="ex-name">Erdnussbutter & Erdnussmus</div><div class="ex-detail">Orales Allergiesyndrom — kein Kompromiss · Fette über Butter, Olivenöl & Avocado gedeckt</div></div><span class="ex-badge badge-warn">Allergie</span></div>
+      <div class="ex-row"><div><div class="ex-name">Pflanzliche Öle (Sonnenblume, Raps, Mais)</div><div class="ex-detail">Omega-6 zu hoch — durch Butter und Olivenöl ersetzen</div></div><span class="ex-badge badge-warn">Ersetzen</span></div>
+      <div class="ex-row"><div><div class="ex-name">Fertigprodukte & verarbeitete Wurstwaren</div><div class="ex-detail">Nicht wegen Kalorien — wegen Inhaltsstoffen · Snack: Datteln, Quark, Käse, Avocado</div></div><span class="ex-badge badge-warn">Ersetzen</span></div>
+      <div class="ex-row"><div><div class="ex-name">Cassia-Zimt</div><div class="ex-detail">Bei täglichem Konsum zu hoher Cumarin-Gehalt · immer Ceylon kaufen</div></div><span class="ex-badge badge-warn">Ersetzen</span></div>
+    </div>
+
+  </div>
+</section>
+
+</div><!-- end mode-ernaehrung -->
+
+</main>
+
+<!-- BOTTOM NAV: two groups -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-group active" id="bnav-routine" style="display:flex;">
+  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-r">0%</span></button>
+
+  <button class="bottom-nav-btn active" data-tab="am" onclick="switchTab('am')">
+    <span class="nav-dot"></span>
+    <span class="nav-icon">🌅</span>
+    Morgen
+  </button>
+  <button class="bottom-nav-btn" data-tab="pre" onclick="switchTab('pre')">
+    <span class="nav-dot"></span>
+    <span class="nav-icon">⚡</span>
+    Pre
+  </button>
+  <button class="bottom-nav-btn" data-tab="post" onclick="switchTab('post')">
+    <span class="nav-dot"></span>
+    <span class="nav-icon">🔄</span>
+    Post
+  </button>
+  <button class="bottom-nav-btn" data-tab="pm" onclick="switchTab('pm')">
+    <span class="nav-dot"></span>
+    <span class="nav-icon">🌙</span>
+    Abend
+  </button>
+
+  </div>
+  <div class="bottom-nav-group" id="bnav-ernaehrung">
+  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-bnav-ernaehrung">0%</span></button>
+    <button class="bottom-nav-btn active" data-tab="phil"   onclick="switchTab('phil')"><span class="nav-dot"></span><span class="nav-icon">🌱</span>Basis</button>
+    <button class="bottom-nav-btn"        data-tab="timing" onclick="switchTab('timing')"><span class="nav-dot"></span><span class="nav-icon">⏱</span>Timing</button>
+    <button class="bottom-nav-btn"        data-tab="tag"    onclick="switchTab('tag')"><span class="nav-dot"></span><span class="nav-icon">📅</span>Beispiel</button>
+    <button class="bottom-nav-btn"        data-tab="food"   onclick="switchTab('food')"><span class="nav-dot"></span><span class="nav-icon">🛒</span>Einkauf</button>
+  </div>
+  <div class="bottom-nav-group" id="bnav-training">
+  <button class="bottom-nav-btn" onclick="openWaterSheet()" style="color:var(--post)"><span class="nav-dot" style="background:var(--post)"></span><span class="nav-icon">💧</span><span id="bnav-water-pct-bnav-training">0%</span></button>
+
+  <button class="bottom-nav-btn active" data-tab="week"  onclick="switchTab('week')"><span class="nav-icon">📅</span>Woche</button>
+  <button class="bottom-nav-btn"        data-tab="upper" onclick="switchTab('upper')"><span class="nav-icon">💪</span>Oberkörper</button>
+  <button class="bottom-nav-btn"        data-tab="legs"  onclick="switchTab('legs')"><span class="nav-icon">🦵</span>Beine</button>
+  <button class="bottom-nav-btn"        data-tab="run"   onclick="switchTab('run')"><span class="nav-icon">🏃</span>Laufen</button>
+  <button class="bottom-nav-btn"        data-tab="prog"  onclick="switchTab('prog')"><span class="nav-icon">📈</span>Prog.</button>
+
+  </div>
+</nav>
+
+<script>
+const PHASES = {
+  'am':['am-1','am-2','am-3','am-4','am-5','am-6','am-7'],
+  'pre':['pre-1','pre-2','pre-3'],
+  'post':['post-1','post-2','post-3','post-4','post-5'],
+  'pm':['pm-1','pm-2','pm-3']
+};
+const ALL_PHASES = Object.values(PHASES).flat();
+let checked = JSON.parse(localStorage.getItem('andyV4') || '{}');
+function saveState(){ localStorage.setItem('andyV4', JSON.stringify(checked)); }
+
+let currentMode = 'routine';
+
+function switchMode(mode){
+  currentMode = mode;
+  document.querySelectorAll('.mode-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('mode-'+mode).classList.add('active');
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
+  // nav groups
+  document.querySelectorAll('.nav-group').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-'+mode).classList.add('active');
+  document.querySelectorAll('.bottom-nav-group').forEach(n=>{n.classList.remove('active');n.style.display='none';});
+  const bn=document.getElementById('bnav-'+mode); bn.classList.add('active'); bn.style.display='flex';
+  // progress ring only relevant for routine
+  document.getElementById('progressMini').style.visibility = mode==='routine'?'visible':'hidden';
+  // activate first tab of the mode
+  const firstTab = mode==='routine'?'am':mode==='training'?'week':'phil';
+  switchTab(firstTab);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn,.bottom-nav-btn').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('panel-'+tab);
+  if(panel) panel.classList.add('active');
+  document.querySelectorAll(`[data-tab="${tab}"]`).forEach(b=>b.classList.add('active'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggle(el){
+  const id=el.dataset.id;
+  checked[id]=!checked[id];
+  el.classList.toggle('done',checked[id]);
+  saveState(); updateProgress();
+}
+function togglePhase(h){ h.closest('.phase-card').classList.toggle('open'); }
+
+function updateProgress(){
+  const all=document.querySelectorAll('.check-item[data-id]');
+  const total=all.length;
+  const done=[...all].filter(i=>checked[i.dataset.id]).length;
+  const pct=total>0?Math.round((done/total)*100):0;
+  const circ=88, offset=circ-(circ*pct/100);
+  document.getElementById('ringFill').style.strokeDashoffset=offset;
+  document.getElementById('ringPct').textContent=pct+'%';
+  Object.entries(PHASES).forEach(([tab,phases])=>{
+    const items=document.querySelectorAll(phases.map(p=>`[data-id^="${p}-"]`).join(','));
+    const t=items.length, d=[...items].filter(i=>checked[i.dataset.id]).length;
+    const badge=document.getElementById('badge-'+tab);
+    if(badge) badge.textContent=`${d}/${t}`;
+  });
+  ALL_PHASES.forEach(ph=>{
+    const items=document.querySelectorAll(`[data-id^="${ph}-"]`);
+    if(!items.length) return;
+    const d=[...items].filter(i=>checked[i.dataset.id]).length;
+    const el=document.getElementById('prog-'+ph);
+    if(!el) return;
+    el.textContent=`${d}/${items.length}`;
+    el.className='phase-prog'+(d===items.length&&d>0?' complete':'');
+  });
+}
+function resetAll(){
+  if(!confirm('Routine-Fortschritt für heute zurücksetzen?')) return;
+  checked={}; saveState();
+  document.querySelectorAll('.check-item').forEach(el=>el.classList.remove('done'));
+  updateProgress();
+}
+function restoreState(){
+  document.querySelectorAll('.check-item[data-id]').forEach(el=>{
+    if(checked[el.dataset.id]) el.classList.add('done');
+  });
+  updateProgress();
+}
+restoreState();
+
+// ── WATER TRACKER ──
+const GLASS_ML      = 250;
+const GOAL_NORMAL   = 3000;
+const GOAL_TRAINING = 3500;
+let waterMl        = parseInt(localStorage.getItem('andyWaterMl') || '0');
+let isTrainingDay  = localStorage.getItem('andyTrainingDay') === 'true';
+let toastTimeout   = null;
+let reminderInt    = null;
+
+function getGoal() { return isTrainingDay ? GOAL_TRAINING : GOAL_NORMAL; }
+function saveWater() { localStorage.setItem('andyWaterMl', String(waterMl)); }
+function saveTraining() { localStorage.setItem('andyTrainingDay', String(isTrainingDay)); }
+
+function renderWater() {
+  const goal = getGoal();
+  const pct  = Math.min(Math.round(waterMl / goal * 100), 100);
+
+  // desktop bar
+  const fill = document.getElementById('wbarFill');
+  if (fill) fill.style.width = pct + '%';
+  const amt = document.getElementById('wbarAmount');
+  if (amt) amt.textContent = fmtMl(waterMl) + ' / ' + (goal/1000).toFixed(1).replace('.',',') + ' L';
+  const wbt = document.getElementById('wbarToggle');
+  if (wbt) wbt.classList.toggle('on', isTrainingDay);
+  const wbl = document.getElementById('wbarLabel');
+  if (wbl) { wbl.textContent = isTrainingDay ? 'Training' : 'Normal'; wbl.className = 'wbar-toggle-label' + (isTrainingDay ? ' on' : ''); }
+
+  // mobile sheet ring (circ = 2π×52.5 ≈ 329.9)
+  const circ = 330;
+  const offset = circ - (circ * pct / 100);
+  const rf = document.getElementById('waterRingFill');
+  if (rf) rf.style.strokeDashoffset = offset;
+  const rm = document.getElementById('waterRingMl');
+  if (rm) rm.textContent = fmtMl(waterMl);
+  const rg = document.getElementById('waterRingGoal');
+  if (rg) rg.textContent = '/ ' + (goal/1000).toFixed(1).replace('.',',') + ' L';
+  const rp = document.getElementById('waterRingPct');
+  if (rp) rp.textContent = pct + '% vom Tagesziel';
+  const st = document.getElementById('sheetToggle');
+  if (st) st.classList.toggle('on', isTrainingDay);
+  const sl = document.getElementById('sheetToggleLabel');
+  if (sl) { sl.textContent = isTrainingDay ? 'Trainingstag (3,5 L)' : 'Normaltag (3,0 L)'; sl.className = 'toggle-text' + (isTrainingDay ? ' on' : ''); }
+
+  // mobile nav pct badges
+  ['bnav-water-pct-r','bnav-water-pct-bnav-training','bnav-water-pct-bnav-ernaehrung'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = pct + '%';
+  });
+}
+
+function fmtMl(ml) {
+  return ml >= 1000
+    ? (ml/1000).toFixed(2).replace('.',',').replace(/,?0+$/,'') + ' L'
+    : ml + ' ml';
+}
+
+function waterAdd() {
+  waterMl += GLASS_ML;
+  saveWater(); renderWater();
+  const goal = getGoal();
+  if (waterMl >= goal) showToast('🎉 Tagesziel ' + (goal/1000).toFixed(1) + ' L erreicht!', 3000);
+  else if (waterMl % 1000 === 0) showToast('💧 ' + (waterMl/1000).toFixed(0) + ' L — weiter so!', 2000);
+}
+
+function waterSub() {
+  if (waterMl <= 0) return;
+  waterMl = Math.max(0, waterMl - GLASS_ML);
+  saveWater(); renderWater();
+}
+
+function toggleTrainingDay() {
+  isTrainingDay = !isTrainingDay;
+  saveTraining(); renderWater();
+  showToast(isTrainingDay ? '🏋️ Trainingstag — Ziel: 3,5 L' : '😴 Normaltag — Ziel: 3,0 L', 2200);
+}
+
+function openWaterSheet() {
+  document.getElementById('waterSheet').classList.add('open');
+}
+function closeWaterSheet(e) {
+  if (!e || e.target === document.getElementById('waterSheet')) {
+    document.getElementById('waterSheet').classList.remove('open');
+  }
+}
+
+function showToast(msg, dur) {
+  const t = document.getElementById('waterToast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), dur || 2200);
+}
+
+function checkWaterReminder() {
+  const h = new Date().getHours();
+  if (h < 7 || h >= 22) return;
+  const elapsed  = (h * 60 + new Date().getMinutes()) - 7 * 60;
+  const expected = Math.round(getGoal() * Math.min(elapsed / (15 * 60), 1));
+  if (waterMl < expected - GLASS_ML) {
+    const rem = ((getGoal() - waterMl) / 1000).toFixed(1).replace('.',',');
+    showToast('💧 Noch ' + rem + ' L bis zum Tagesziel', 3500);
+  }
+}
+
+function checkDailyReset() {
+  const today = new Date().toDateString();
+  if (localStorage.getItem('andyWaterDay') !== today) {
+    waterMl = 0; saveWater();
+    localStorage.setItem('andyWaterDay', today);
+  }
+}
+
+// Init
+checkDailyReset();
+renderWater();
+reminderInt = setInterval(checkWaterReminder, 45 * 60 * 1000);
+setTimeout(checkWaterReminder, 4000);
+
+</script>
+
+<!-- PWA INSTALL BANNER (iOS) -->
+<div id="installBanner" style="
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:1000;
+  background:rgba(22,22,31,.98); border-top:1px solid #252530;
+  padding:16px 20px calc(16px + env(safe-area-inset-bottom));
+  font-family:'Instrument Sans',sans-serif;
+  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  animation: slideUp .3s ease;
+">
+  <div style="display:flex;align-items:flex-start;gap:12px;">
+    <span style="font-size:36px;line-height:1;flex-shrink:0;">💪</span>
+    <div style="flex:1;">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:#f0f0f5;margin-bottom:4px;">Als App installieren</div>
+      <div style="font-size:12px;color:#6b6b80;line-height:1.5;">Tippe auf <strong style="color:#f0f0f5;">Teilen</strong> <span style="font-size:14px;">⬆️</span> und dann auf <strong style="color:#f0f0f5;">"Zum Home-Bildschirm"</strong> — dann läuft Andy's System wie eine echte App.</div>
+    </div>
+    <button onclick="document.getElementById('installBanner').style.display='none';localStorage.setItem('pwa-banner-dismissed','1')" style="
+      background:none;border:none;color:#6b6b80;font-size:20px;cursor:pointer;
+      padding:4px;line-height:1;flex-shrink:0;
+    ">✕</button>
+  </div>
+</div>
+<script>
+document.getElementById('installBanner').style.display = 'block';
+const _b = document.getElementById('installBanner');
+_b.style.display = 'none'; // reset, controlled by JS above
+</script>
+
+</body>
+</html>
