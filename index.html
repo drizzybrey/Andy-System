@@ -3728,22 +3728,19 @@ async function pushLogToCloud(entry) {
       water:     entry.water    || null,
       score:     entry.score    || null
     };
-    console.log('Pushing to:', SB_ENDPOINT);
-    console.log('Payload:', JSON.stringify(payload));
-    const res = await fetch(SB_ENDPOINT, {
+    // UPSERT — insert or update if date already exists
+    const upsertUrl = SB_ENDPOINT + '?on_conflict=date';
+    const res = await fetch(upsertUrl, {
       method: 'POST',
       headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
       body: JSON.stringify(payload)
     });
-    console.log('Response status:', res.status);
-    const responseText = await res.text();
-    console.log('Response body:', responseText);
     if (res.ok || res.status === 201 || res.status === 200) {
       setSyncStatus('synced');
     } else {
+      const responseText = await res.text();
       console.error('Supabase error:', res.status, responseText);
       setSyncStatus('error');
-      // Show error detail in sync status
       const el = document.getElementById('syncStatus');
       if (el) el.textContent = '⚠️ ' + res.status + ': ' + responseText.slice(0,80);
       queueSync(entry);
@@ -3770,7 +3767,7 @@ async function flushSyncQueue() {
   const remaining = [];
   for (const entry of q) {
     try {
-      const res = await fetch(SB_ENDPOINT, {
+      const res = await fetch(SB_ENDPOINT + '?on_conflict=date', {
         method: 'POST',
         headers: { ...SB_HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
         body: JSON.stringify({
