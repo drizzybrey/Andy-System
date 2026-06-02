@@ -189,6 +189,139 @@
 /* Hide the old mobile water sheet on FAB mode */
 .water-sheet-overlay { display: none !important; }
 
+
+/* ── HRV WIDGET ── */
+.hrv-widget {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: border-color .3s;
+}
+.hrv-widget.hrv-green  { border-color: rgba(34,197,94,.4); }
+.hrv-widget.hrv-yellow { border-color: rgba(250,204,21,.4); }
+.hrv-widget.hrv-red    { border-color: rgba(239,68,68,.4); }
+
+.hrv-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+.hrv-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.hrv-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.hrv-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.hrv-score-input {
+  width: 56px;
+  height: 48px;
+  background: var(--faint);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+  -webkit-appearance: none;
+  transition: border-color .2s;
+}
+.hrv-score-input:focus { border-color: var(--post); }
+.hrv-score-input.green  { border-color: #22c55e; color: #22c55e; }
+.hrv-score-input.yellow { border-color: #facc15; color: #facc15; }
+.hrv-score-input.red    { border-color: #ef4444; color: #ef4444; }
+.hrv-score-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* recommendation banner */
+.hrv-rec {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.hrv-rec.show { display: flex; }
+.hrv-rec.green  { background: rgba(34,197,94,.1);  color: #4ade80; }
+.hrv-rec.yellow { background: rgba(250,204,21,.1); color: #fde047; }
+.hrv-rec.red    { background: rgba(239,68,68,.1);  color: #f87171; }
+.hrv-rec-icon { font-size: 20px; flex-shrink: 0; }
+.hrv-rec-text { flex: 1; }
+.hrv-rec-title { font-weight: 700; margin-bottom: 2px; }
+
+/* 7-day trend chart */
+.hrv-chart-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.hrv-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 44px;
+}
+.hrv-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.hrv-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  min-height: 3px;
+  transition: height .4s ease, background .3s;
+}
+.hrv-bar.green  { background: #22c55e; }
+.hrv-bar.yellow { background: #facc15; }
+.hrv-bar.red    { background: #ef4444; }
+.hrv-bar.empty  { background: var(--faint); height: 3px !important; }
+.hrv-bar-val {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.hrv-bar-day {
+  font-family: 'Inter', sans-serif;
+  font-size: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
 </style>
 <script>
 // Register inline service worker for offline support
@@ -790,6 +923,32 @@ a{touch-action:manipulation;}
       <span class="duration">~55 min</span>
     </div>
 
+    
+    <!-- HRV WIDGET -->
+    <div class="hrv-widget" id="hrvWidget">
+      <div class="hrv-top">
+        <div>
+          <div class="hrv-title">📊 HRV — Tagesbewertung</div>
+          <div class="hrv-subtitle">Elite HRV Score eingeben · Polar H10 liegend vor dem Aufstehen messen</div>
+        </div>
+        <div class="hrv-input-wrap">
+          <input class="hrv-score-input" id="hrvInput" type="number"
+            min="1" max="10" placeholder="—" inputmode="decimal"
+            onchange="submitHrv(this.value)" oninput="previewHrv(this.value)">
+          <div class="hrv-score-label">Score<br>1–10</div>
+        </div>
+      </div>
+      <div class="hrv-rec" id="hrvRec">
+        <span class="hrv-rec-icon" id="hrvRecIcon"></span>
+        <div class="hrv-rec-text">
+          <div class="hrv-rec-title" id="hrvRecTitle"></div>
+          <div id="hrvRecBody"></div>
+        </div>
+      </div>
+      <div class="hrv-chart-label">Verlauf — letzte 7 Tage</div>
+      <div class="hrv-bars" id="hrvBars"></div>
+    </div>
+
     <div class="phase-grid">
 
       <!-- Aufwachen -->
@@ -1263,8 +1422,8 @@ a{touch-action:manipulation;}
           <div class="check-item" onclick="toggle(this)" data-id="post-2-1">
             <div class="check-box">✓</div>
             <div class="check-content">
-              <div class="check-name">3 Gänge à 12–15 min bei 80–95°C</div>
-              <div class="check-detail">Zwischen den Gängen 10–15 min Abkühlung. GH-Ausschüttung ab 20+ min deutlich</div>
+              <div class="check-name">Optimiertes Sauna-Protokoll · 3 Gänge bei 80–95°C</div>
+              <div class="check-detail"><strong>Gang 1: 20 min</strong> — GH-Ausschüttung startet erst nach 20 min · <strong>Gang 2: 15 min</strong> — Muskelentspannung, Laktatabbau · <strong>Gang 3: 10 min</strong> — Abschluss · je 10–15 min Abkühlung dazwischen · Gesamt ~75 min</div>
               <div class="tags"><span class="tag t-warm">Sauna</span></div>
             </div>
           </div>
@@ -1449,7 +1608,7 @@ a{touch-action:manipulation;}
           <table class="regen-table">
             <thead><tr><th>Tag</th><th>Direkt danach</th><th>Abends</th></tr></thead>
             <tbody>
-              <tr><td>Kraft</td><td>Sauna 3× · kalt abschließen · Tiger Balm ROT</td><td>Epsom-Bad optional · Magnesiumöl · Lacrosse: Pec + Piriformis</td></tr>
+              <tr><td>Kraft</td><td>Sauna 20+15+10 min · kalt abschließen · Tiger Balm ROT</td><td>Epsom-Bad optional · Magnesiumöl · Lacrosse: Pec + Piriformis</td></tr>
               <tr><td>Laufen</td><td>Wechseldusche 3–5× · Tiger Balm WEISS</td><td>Kompression · Lacrosse: Plantarfaszie + Piriformis · Legs up Wall</td></tr>
               <tr><td>Kombi</td><td>Kalt nach Lauf · Sauna nach Kraft (4–6h)</td><td>Epsom-Bad · Magnesiumöl · alle Lacrosse-Zonen</td></tr>
               <tr><td>Ruhetag</td><td>Spazieren, Mobility — keine intensive Kälte</td><td>Warmes Bad + Lavendel · Foam Rolling sanft · Subokzipitale</td></tr>
@@ -2335,6 +2494,137 @@ function restoreState(){
   });
   updateProgress();
 }
+
+// ── HRV TRACKER ──
+const HRV_KEY      = 'andyHrv';
+const HRV_DATE_KEY = 'andyHrvDate';
+const HRV_HIST_KEY = 'andyHrvHistory';
+
+function loadHrvHistory() {
+  try { return JSON.parse(localStorage.getItem(HRV_HIST_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function saveHrvEntry(score, date) {
+  let hist = loadHrvHistory();
+  // Remove existing entry for today if any
+  hist = hist.filter(e => e.date !== date);
+  hist.push({ date, score });
+  // Keep last 30 days
+  hist.sort((a,b) => a.date.localeCompare(b.date));
+  if (hist.length > 30) hist = hist.slice(-30);
+  localStorage.setItem(HRV_HIST_KEY, JSON.stringify(hist));
+  localStorage.setItem(HRV_DATE_KEY, date);
+  localStorage.setItem(HRV_KEY, String(score));
+}
+
+function getHrvColor(score) {
+  if (score >= 7) return 'green';
+  if (score >= 4) return 'yellow';
+  return 'red';
+}
+
+function getHrvRec(score) {
+  if (score >= 8) return {
+    icon: '🔥', cls: 'green',
+    title: 'Maximaler Einsatz heute',
+    body: 'Nervensystem vollständig erholt. Idealer Tag für schwere Krafteinheiten, intensive Intervalle oder Kombi-Training.'
+  };
+  if (score >= 7) return {
+    icon: '✅', cls: 'green',
+    title: 'Volles Training möglich',
+    body: 'Gute Erholung. Normales Trainingsprotokoll wie geplant durchführen.'
+  };
+  if (score >= 5) return {
+    icon: '⚡', cls: 'yellow',
+    title: 'Moderates Training',
+    body: 'Leicht erhöhter Stress. Intensität um 10–20% reduzieren. Kein Maximalversuch heute — technischer Fokus.'
+  };
+  if (score >= 4) return {
+    icon: '⚠️', cls: 'yellow',
+    title: 'Leichtes Training oder Mobility',
+    body: 'Körper braucht mehr Erholung. Zone-2-Lauf, Mobility oder Sauna statt hartem Kraft-Training.'
+  };
+  return {
+    icon: '🛑', cls: 'red',
+    title: 'Regenerationstag',
+    body: 'HRV deutlich unter deiner Baseline. Spazieren, Dehnen, Sauna. Kein intensives Training heute — du gewinnst mehr durch Erholung.'
+  };
+}
+
+function previewHrv(val) {
+  const score = parseFloat(val);
+  if (!val || isNaN(score) || score < 1 || score > 10) return;
+  const color = getHrvColor(score);
+  const input = document.getElementById('hrvInput');
+  if (input) { input.className = 'hrv-score-input ' + color; }
+  const widget = document.getElementById('hrvWidget');
+  if (widget) { widget.className = 'hrv-widget hrv-' + color; }
+  const rec = document.getElementById('hrvRec');
+  if (!rec) return;
+  const data = getHrvRec(score);
+  rec.className = 'hrv-rec show ' + data.cls;
+  document.getElementById('hrvRecIcon').textContent  = data.icon;
+  document.getElementById('hrvRecTitle').textContent = data.title;
+  document.getElementById('hrvRecBody').textContent  = data.body;
+}
+
+function submitHrv(val) {
+  const score = parseFloat(val);
+  if (!val || isNaN(score) || score < 1 || score > 10) return;
+  const today = new Date().toISOString().slice(0,10);
+  saveHrvEntry(score, today);
+  renderHrvChart();
+}
+
+function renderHrvChart() {
+  const bars = document.getElementById('hrvBars');
+  if (!bars) return;
+  const hist = loadHrvHistory();
+  const today = new Date();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0,10);
+    const entry = hist.find(e => e.date === dateStr);
+    const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+    days.push({ date: dateStr, score: entry ? entry.score : null, label: dayNames[d.getDay()] });
+  }
+  bars.innerHTML = days.map(day => {
+    if (!day.score) {
+      return `<div class="hrv-bar-wrap">
+        <div class="hrv-bar empty" style="height:3px"></div>
+        <div class="hrv-bar-day">${day.label}</div>
+      </div>`;
+    }
+    const color = getHrvColor(day.score);
+    const heightPx = Math.round((day.score / 10) * 40);
+    return `<div class="hrv-bar-wrap">
+      <div class="hrv-bar ${color}" style="height:${heightPx}px"></div>
+      <div class="hrv-bar-val">${day.score}</div>
+      <div class="hrv-bar-day">${day.label}</div>
+    </div>`;
+  }).join('');
+}
+
+function initHrv() {
+  // Restore today's value if already entered
+  const today = new Date().toISOString().slice(0,10);
+  const savedDate  = localStorage.getItem(HRV_DATE_KEY);
+  const savedScore = localStorage.getItem(HRV_KEY);
+  if (savedDate === today && savedScore) {
+    const input = document.getElementById('hrvInput');
+    if (input) {
+      input.value = savedScore;
+      previewHrv(savedScore);
+    }
+  }
+  renderHrvChart();
+}
+
+initHrv();
+
 restoreState();
 
 // ── WATER TRACKER ──
