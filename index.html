@@ -1448,14 +1448,24 @@ a{touch-action:manipulation;}
       <div class="hrv-top">
         <div>
           <div class="hrv-title">📊 HRV — Tagesbewertung</div>
-          <div class="hrv-subtitle">Elite HRV Score eingeben · Polar H10 liegend vor dem Aufstehen messen</div>
+          <div class="hrv-subtitle">Polar H10 liegend messen · Score oder RMSSD eingeben</div>
           <button class="hrv-info-toggle" onclick="toggleHrvInfo()">ℹ️ Was ist HRV?</button>
         </div>
-        <div class="hrv-input-wrap">
-          <input class="hrv-score-input" id="hrvInput" type="number"
-            min="1" max="10" placeholder="—" inputmode="decimal"
-            onchange="submitHrv(this.value)" oninput="previewHrv(this.value)">
-          <div class="hrv-score-label">Score<br>1–10</div>
+        <div class="hrv-input-wrap" style="flex-direction:column;align-items:flex-end;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input class="hrv-score-input" id="hrvInput" type="number"
+              min="1" max="10" placeholder="—" inputmode="decimal"
+              onchange="submitHrv(this.value)" oninput="previewHrv(this.value)"
+              style="width:52px;">
+            <div class="hrv-score-label">Score<br>1–10</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input class="hrv-score-input" id="rmssdInput" type="number"
+              min="1" max="300" placeholder="—" inputmode="decimal"
+              onchange="submitRmssd(this.value)" oninput="previewRmssd(this.value)"
+              style="width:64px;font-size:16px;">
+            <div class="hrv-score-label">RMSSD<br>ms</div>
+          </div>
         </div>
       </div>
 
@@ -1465,7 +1475,10 @@ a{touch-action:manipulation;}
         <strong>Herzratenvariabilität (HRV)</strong> misst die Schwankung der Zeit zwischen zwei aufeinanderfolgenden Herzschlägen — in Millisekunden. Kein gleichmäßiger Herzschlag ist ein Zeichen von Stärke: ein gesundes, erholes Nervensystem variiert mehr. Ein gestresstes oder erschöpftes Nervensystem schlägt starr und gleichmäßig.
 
         <h4>Wie messen?</h4>
-        <strong>Polar H10 anlegen</strong> direkt nach dem Aufwachen — noch liegend, vor dem Aufstehen. <strong>Elite HRV App</strong> öffnen, 2-Minuten-Messung starten. Ruhig atmen, nicht bewegen. Der Score den die App ausgibt (1–10) ist dein heutiger Wert — relativ zu deiner persönlichen Baseline, nicht zu einem absoluten Standard. Nach 2–3 Wochen regelmäßiger Messung wird der Score erst wirklich aussagekräftig.
+        <strong>Polar H10 anlegen</strong> direkt nach dem Aufwachen — noch liegend, vor dem Aufstehen. <strong>Elite HRV App</strong> öffnen, 2-Minuten-Messung starten. Ruhig atmen, nicht bewegen.<br><br>
+        <strong>Was eintragen?</strong> Du hast zwei Optionen:<br>
+        • <strong>Score (1–10)</strong> — falls Elite HRV einen Score anzeigt<br>
+        • <strong>RMSSD in ms</strong> — falls du nur den Rohwert siehst (z.B. 126 ms). Die App rechnet den Score automatisch um.
 
         <h4>Was bedeutet der Score?</h4>
         <div class="hrv-scale">
@@ -3255,17 +3268,16 @@ function loadHrvHistory() {
   catch { return []; }
 }
 
-function saveHrvEntry(score, date) {
+function saveHrvEntry(score, date, rmssd) {
   let hist = loadHrvHistory();
-  // Remove existing entry for today if any
   hist = hist.filter(e => e.date !== date);
-  hist.push({ date, score });
-  // Keep last 30 days
+  hist.push({ date, score, rmssd: rmssd || null });
   hist.sort((a,b) => a.date.localeCompare(b.date));
   if (hist.length > 30) hist = hist.slice(-30);
   localStorage.setItem(HRV_HIST_KEY, JSON.stringify(hist));
   localStorage.setItem(HRV_DATE_KEY, date);
   localStorage.setItem(HRV_KEY, String(score));
+  if (rmssd) localStorage.setItem('andyRmssd', String(rmssd));
 }
 
 
@@ -3329,11 +3341,60 @@ function previewHrv(val) {
   document.getElementById('hrvRecBody').textContent  = data.body;
 }
 
+
+// Convert RMSSD (ms) to HRV score 1-10 using ln(RMSSD) scale
+// ln(RMSSD) typically ranges from ~2.5 (low) to ~5.5 (very high)
+// We map this to 1-10
+function rmssdToScore(rmssd) {
+  if (!rmssd || rmssd <= 0) return null;
+  const ln = Math.log(rmssd);
+  // Typical range: ln(12)=2.48 (score 1) to ln(245)=5.5 (score 10)
+  const minLn = 2.5;
+  const maxLn = 5.5;
+  const score = ((ln - minLn) / (maxLn - minLn)) * 9 + 1;
+  return Math.min(10, Math.max(1, Math.round(score * 10) / 10));
+}
+
+function previewRmssd(val) {
+  const rmssd = parseFloat(val);
+  if (!val || isNaN(rmssd) || rmssd <= 0) return;
+  const score = rmssdToScore(rmssd);
+  if (!score) return;
+  // Update score input to show calculated value
+  const scoreInput = document.getElementById('hrvInput');
+  if (scoreInput) {
+    scoreInput.value = score.toFixed(1);
+    previewHrv(score);
+  }
+  // Show RMSSD input colored
+  const rmssdInput = document.getElementById('rmssdInput');
+  if (rmssdInput) {
+    const color = getHrvColor(score);
+    rmssdInput.className = 'hrv-score-input ' + color;
+  }
+}
+
+function submitRmssd(val) {
+  const rmssd = parseFloat(val);
+  if (!val || isNaN(rmssd) || rmssd <= 0) return;
+  const score = rmssdToScore(rmssd);
+  if (!score) return;
+  // Update score input
+  const scoreInput = document.getElementById('hrvInput');
+  if (scoreInput) scoreInput.value = score.toFixed(1);
+  // Save with rmssd stored too
+  const today = getLocalDateStr();
+  saveHrvEntry(score, today, rmssd);
+  renderHrvChart();
+  // Update preview
+  previewHrv(score);
+}
+
 function submitHrv(val) {
   const score = parseFloat(val);
   if (!val || isNaN(score) || score < 1 || score > 10) return;
   const today = getLocalDateStr();
-  saveHrvEntry(score, today);
+  saveHrvEntry(score, today, null);
   renderHrvChart();
 }
 
@@ -3379,15 +3440,20 @@ function toggleHrvInfo() {
 }
 
 function initHrv() {
-  // Restore today's value if already entered
   const today = getLocalDateStr();
   const savedDate  = localStorage.getItem(HRV_DATE_KEY);
   const savedScore = localStorage.getItem(HRV_KEY);
+  const savedRmssd = localStorage.getItem('andyRmssd');
   if (savedDate === today && savedScore) {
     const input = document.getElementById('hrvInput');
-    if (input) {
-      input.value = savedScore;
-      previewHrv(savedScore);
+    if (input) { input.value = savedScore; previewHrv(savedScore); }
+    if (savedRmssd) {
+      const rmssdInput = document.getElementById('rmssdInput');
+      if (rmssdInput) {
+        rmssdInput.value = savedRmssd;
+        const color = getHrvColor(parseFloat(savedScore));
+        rmssdInput.className = 'hrv-score-input ' + color;
+      }
     }
   }
   renderHrvChart();
